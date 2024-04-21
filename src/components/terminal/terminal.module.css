@@ -1,0 +1,95 @@
+.display {
+  display: flex;
+  flex: 1;
+  flex-direction: column-reverse;
+  width: 100%;
+  color: var(--fg);
+  background-color: var(--bg);
+  background-image: radial-gradient(ellipse, var(--bg) 0%, var(--off) 90%);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-anchor: none;
+  font-size: 1.8rem;
+  @media only screen and (min-width: 768px) {
+    font-size: 2.5rem;
+  }
+  word-break: break-word;
+  white-space: pre-wrap;
+  text-transform: uppercase;
+  animation: textShadow 4s infinite;
+  user-select: none;
+}
+
+.display:before {
+  content: ' ';
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(18, 16,16, 0.1) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 8px;
+}
+
+@keyframes textShadow {
+  0% {
+    text-shadow: 0.43px 0 1px var(--s-blue), -0.43px 0 1px var(--s-red), 0 0 3px;
+  }
+  15% {
+    text-shadow: 0.4px 0 1px var(--s-blue), -0.4px 0 1px var(--s-red), 0 0 3px;
+  }
+  25% {
+    text-shadow: 1.61px 0 1px var(--s-blue), -1.61px 0 1px var(--s-red), 0 0 3px;
+  }
+  35% {
+    text-shadow: 3.89px 0 1px var(--s-blue), -3.89px 0 1px var(--s-red), 0 0 3px;
+  }
+  50% {
+    text-shadow: 0.08px 0 1px var(--s-blue), -0.08px 0 1px var(--s-red), 0 0 3px;
+  }
+  60% {
+    text-shadow: 2.2px 0 1px var(--s-blue), -2.2px 0 1px var(--s-red), 0 0 3px;
+  }
+  75% {
+    text-shadow: 1.89px 0 1px var(--s-blue), -1.89px 0 1px var(--s-red), 0 0 3px;
+  }
+  85% {
+    text-shadow: 0.09px 0 1px var(--s-blue), -0.09px 0 1px var(--s-red), 0 0 3px;
+  }
+  100% {
+    text-shadow: 2.62px 0 1px var(--s-blue), -2.62px 0 1px var(--s-red), 0 0 3px;
+  }
+}
+
+.scanline {
+  position: relative;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.2) 10%, rgba(0, 0, 0, 0.1) 100%);
+  opacity: 0.1;
+  z-index: 10;
+  bottom: 100%;
+  pointer-events: none;
+  animation: scanline 10s linear infinite;
+}
+
+@keyframes scanline {
+  0% {
+    bottom: 100%;
+  }
+  80% {
+    bottom: 100%;
+  }
+  100% {
+    bottom: -20%;
+  }
+}
+
+.content {
+  flex: 1;
+  margin: 2rem;
+}

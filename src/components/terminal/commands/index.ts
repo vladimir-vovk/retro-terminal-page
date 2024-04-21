@@ -1,0 +1,8 @@
+export { clear } from './clear'
+export { help } from './help'
+export { empty } from './empty'
+export { install } from './install'
+export { contact } from './contact'
+export { welcome } from './welcome'
+export { makeCoffee } from './make-coffee'
+export { whoami } from './whoami'

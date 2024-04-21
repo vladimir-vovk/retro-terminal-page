@@ -1,0 +1,31 @@
+.input::before {
+  content: var(--prompt);
+}
+
+.input[data-active="true"]::after {
+  content: var(--cursor);
+  transform: scaleY(1.4);
+  animation: 1s step-end 0s infinite cursor;
+  display: inline-block;
+  transform: scale(0.8, 0.7);
+}
+
+.input>span::selection {
+  color: var(--bg);
+  background-color: var(--fg);
+}
+
+@keyframes cursor {
+  0% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

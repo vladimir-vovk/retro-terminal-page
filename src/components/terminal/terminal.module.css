@@ -18,7 +18,6 @@
   white-space: pre-wrap;
   text-transform: uppercase;
   animation: textShadow 4s infinite;
-  user-select: none;
   outline: none;
 }
 

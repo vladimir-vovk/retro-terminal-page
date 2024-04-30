@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, useRef, useEffect } from 'react'
 import { ContentBlock } from './types'
 import { createContentBlock } from './utils'
 
@@ -11,7 +11,22 @@ type Props = {
 }
 
 export const Menu = ({ content, setContent, execute }: Props) => {
+  const sound = useRef<any>()
+
+  useEffect(() => {
+    sound.current = new Audio('sounds/key-5.wav')
+  }, [])
+
+  const playSound = () => {
+    if (sound.current) {
+      sound.current.load()
+      sound.current.play()
+    }
+  }
+
   const onPress = (command: string) => {
+    playSound()
+
     setContent((oldContent) => {
       const newContent = [...oldContent.slice(0, -1)]
       newContent.push(
@@ -36,6 +51,8 @@ export const Menu = ({ content, setContent, execute }: Props) => {
     if (!block.isActive || element.type !== 'input') {
       return
     }
+
+    playSound()
 
     setContent((oldContent) => {
       const newContent = [...oldContent.slice(0, -1)]

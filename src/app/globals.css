@@ -29,3 +29,15 @@ body {
   font-size: 12px;
   background-color: var(--off);
 }
+
+input, select, button{
+  font-family: inherit;
+  font-size: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+  text-transform: inherit;
+}
+
+*:focus {
+  outline: none;
+}

@@ -1,8 +1,8 @@
-import { createTerminalContent } from '../utils'
+import { createContentBlock } from '../utils'
 import { CommandArgs } from '../types'
 
 export const clear = ({ setContent }: CommandArgs): void => {
   setContent(() => {
-    return [createTerminalContent({})]
+    return [createContentBlock({})]
   })
 }

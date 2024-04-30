@@ -1,0 +1,14 @@
+.menu {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  bottom: 14px;
+  right: 14px;
+}
+
+.menu:hover {
+  color: var(--bg);
+  background-color: var(--fg);
+}

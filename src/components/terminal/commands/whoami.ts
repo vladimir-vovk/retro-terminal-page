@@ -1,4 +1,4 @@
-import { createTerminalContent, makeInactive } from '../utils'
+import { createContentBlock, makeLastBlockInactive } from '../utils'
 import { CommandArgs } from '../types'
 
 export const whoami = ({ setContent }: CommandArgs): void => {
@@ -13,10 +13,14 @@ My name is Vladimir Vovk. I am passionate about web and mobile technologies, Rea
 `
   setContent((oldContent: any) => {
     return [
-      ...makeInactive(oldContent),
-      createTerminalContent({
-        type: 'output',
-        text
+      ...makeLastBlockInactive(oldContent),
+      createContentBlock({
+        elements: [
+          {
+            type: 'text',
+            text
+          }
+        ]
       })
     ]
   })

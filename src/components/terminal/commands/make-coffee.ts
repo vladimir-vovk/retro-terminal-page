@@ -1,4 +1,4 @@
-import { createTerminalContent, makeInactive, pause } from '../utils'
+import { createContentBlock, makeLastBlockInactive, pause } from '../utils'
 import { CommandArgs } from '../types'
 
 export const makeCoffee = async ({ setContent }: CommandArgs): Promise<void> => {
@@ -6,11 +6,15 @@ export const makeCoffee = async ({ setContent }: CommandArgs): Promise<void> => 
 
   setContent((oldContent: any) => {
     return [
-      ...makeInactive(oldContent),
-      createTerminalContent({
-        type: 'output',
+      ...makeLastBlockInactive(oldContent),
+      createContentBlock({
         isScript: true,
-        text: 'Making cofee. Please stand by...'
+        elements: [
+          {
+            type: 'text',
+            text: 'Making cofee. Please stand by...'
+          }
+        ]
       })
     ]
   })
@@ -19,13 +23,17 @@ export const makeCoffee = async ({ setContent }: CommandArgs): Promise<void> => 
 
   setContent((oldContent: any) => {
     return [
-      ...makeInactive(oldContent),
-      createTerminalContent({
-        type: 'output',
+      ...makeLastBlockInactive(oldContent),
+      createContentBlock({
         isScript: true,
-        text: '\n▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒',
-        delay: 300,
-        callback: () => (isWaiting = false)
+        onFinishOutput: () => (isWaiting = false),
+        elements: [
+          {
+            type: 'text',
+            text: '\n\n▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒',
+            delay: 300
+          }
+        ]
       })
     ]
   })
@@ -47,10 +55,14 @@ Enjoy! :)
 `
   setContent((oldContent: any) => {
     return [
-      ...makeInactive(oldContent),
-      createTerminalContent({
-        type: 'output',
-        text
+      ...makeLastBlockInactive(oldContent),
+      createContentBlock({
+        elements: [
+          {
+            type: 'text',
+            text
+          }
+        ]
       })
     ]
   })

@@ -1,0 +1,11 @@
+.button {
+  color: var(--fg);
+  background-color: var(--bg);
+  border: none;
+  display: block;
+}
+
+.button:hover {
+  color: var(--bg);
+  background-color: var(--fg);
+}

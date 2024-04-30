@@ -1,0 +1,17 @@
+.link:link {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.link:active {
+  color: var(--fg);
+}
+
+.link:visited {
+  color: var(--fg);
+}
+
+.link:hover {
+  color: var(--bg);
+  background-color: var(--fg);
+}

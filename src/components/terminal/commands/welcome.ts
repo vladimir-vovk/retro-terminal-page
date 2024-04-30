@@ -1,4 +1,4 @@
-import { createTerminalContent, makeInactive } from '../utils'
+import { createContentBlock, makeLastBlockInactive } from '../utils'
 import { CommandArgs } from '../types'
 import { pause } from '../utils'
 
@@ -9,16 +9,20 @@ export const welcome = async ({ setContent }: CommandArgs): Promise<void> => {
 ░█▀█░█▀▀░█░░░█░░░█░█░▀
 ░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀
 
-Welcome to my personal web-page!
+Welcome to my personal web page!
 
 `
   setContent((_: any) => {
     return [
-      createTerminalContent({
-        type: 'output',
-        text,
+      createContentBlock({
         isScript: true,
-        callback: () => (isWaiting = false)
+        onFinishOutput: () => (isWaiting = false),
+        elements: [
+          {
+            type: 'text',
+            text
+          }
+        ]
       })
     ]
   })
@@ -42,12 +46,16 @@ Please type "help" to get available commands.
 `
   setContent((oldContent: any) => {
     return [
-      ...makeInactive(oldContent),
-      createTerminalContent({
-        type: 'output',
-        text,
+      ...makeLastBlockInactive(oldContent),
+      createContentBlock({
         isScript: true,
-        callback: () => (isWaiting = false)
+        onFinishOutput: () => (isWaiting = false),
+        elements: [
+          {
+            type: 'text',
+            text
+          }
+        ]
       })
     ]
   })
@@ -58,12 +66,15 @@ Please type "help" to get available commands.
 
   setContent((oldContent: any) => {
     return [
-      ...makeInactive(oldContent),
-      createTerminalContent({
-        type: 'input',
-        text,
+      ...makeLastBlockInactive(oldContent),
+      createContentBlock({
         isScript: true,
-        callback: () => (isWaiting = false)
+        onFinishOutput: () => (isWaiting = false),
+        elements: [
+          {
+            type: 'input'
+          }
+        ]
       })
     ]
   })

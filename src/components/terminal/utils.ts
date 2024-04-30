@@ -1,23 +1,31 @@
-import { TerminalContentArgs, TerminalContent } from './types'
+import { CreateContentBlockArgs, ContentBlock } from './types'
 
-export const createTerminalContent = ({
-  type = 'input',
+export const random = <T>(a: Array<T>): T => {
+  const i = Math.floor(Math.random() * a.length)
+  return a[i]
+}
+
+export const createContentBlock = ({
   isActive = true,
-  text = '',
   isScript = false,
-  delay,
-  callback
-}: TerminalContentArgs): TerminalContent => ({
-  id: Math.random(),
-  type,
-  isActive,
-  text,
-  isScript,
-  delay,
-  callback
-})
+  onFinishOutput,
+  elements
+}: CreateContentBlockArgs): ContentBlock => {
+  const _elements = elements ?? [{ type: 'input' }]
 
-export const makeInactive = (content: TerminalContent[]): TerminalContent[] => {
+  return {
+    id: Math.random(),
+    isActive,
+    isScript,
+    onFinishOutput,
+    elements: _elements.map((el) => ({
+      id: Math.random(),
+      ...el
+    }))
+  }
+}
+
+export const makeLastBlockInactive = (content: ContentBlock[]): ContentBlock[] => {
   const newContent = [...content]
   newContent[newContent.length - 1].isActive = false
   return newContent

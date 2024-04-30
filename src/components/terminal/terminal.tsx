@@ -1,21 +1,21 @@
 'use client'
-import { useEffect, useState, ReactElement } from 'react'
+import { useEffect, useState } from 'react'
 import styles from './terminal.module.css'
-import { Input } from './input'
-import { Output } from './output'
-import { TerminalContent } from './types'
-import { createTerminalContent, pause } from './utils'
-import { empty, clear, help, install, contact, welcome, makeCoffee, whoami } from './commands'
-
-const initialContent: TerminalContent[] = [
-  createTerminalContent({
-    type: 'output',
-    isActive: true,
-    isScript: true,
-    text: ''
-  })
-  // createTerminalContent({})
-]
+import { ContentBlock } from './types'
+import { createContentBlock, makeLastBlockInactive, pause } from './utils'
+import { Content } from './content'
+import { Menu } from './menu'
+import {
+  welcome,
+  empty,
+  clear,
+  help,
+  install,
+  contact,
+  makeCoffee,
+  whoami,
+  reboot
+} from './commands'
 
 const commands: Record<string, (...args: any[]) => void> = {
   '': empty,
@@ -25,11 +25,23 @@ const commands: Record<string, (...args: any[]) => void> = {
   contact,
   make_coffee: makeCoffee,
   whoami,
-  reboot: welcome
+  reboot
 }
 
+const initialContent: ContentBlock[] = [
+  createContentBlock({
+    isActive: true,
+    isScript: true,
+    elements: [
+      {
+        type: 'text'
+      }
+    ]
+  })
+]
+
 export const Terminal = () => {
-  const [content, setContent] = useState<TerminalContent[]>(initialContent)
+  const [content, setContent] = useState<ContentBlock[]>(initialContent)
 
   /* run welcome script */
   useEffect(() => {
@@ -52,33 +64,19 @@ export const Terminal = () => {
     return () => removeEventListener('copy', onCopy)
   }, [])
 
-  const onFinishOutput = () => {
-    /* check if command controlled by script */
-    const current = content[content.length - 1]
-    if (current.isScript) {
-      current.callback?.()
-      return
-    }
-
-    setContent((oldContent) => {
-      const newContent = [...oldContent]
-      newContent[newContent.length - 1].isActive = false
-      newContent.push(createTerminalContent({}))
-
-      return newContent
-    })
-  }
-
   const execute = async (command: string) => {
     /* emulate slow execution before run command */
     setContent((oldContent) => {
-      const newContent = [...oldContent]
-      newContent[newContent.length - 1].isActive = false
+      const newContent = makeLastBlockInactive(oldContent)
       newContent.push(
-        createTerminalContent({
-          type: 'output',
+        createContentBlock({
           isActive: true,
-          isScript: true
+          isScript: true,
+          elements: [
+            {
+              type: 'text'
+            }
+          ]
         })
       )
 
@@ -88,6 +86,7 @@ export const Terminal = () => {
     if (command) {
       await pause()
     }
+
     setContent((oldContent) => {
       const newContent = [...oldContent.slice(0, -1)]
       return newContent
@@ -99,28 +98,19 @@ export const Terminal = () => {
       setContent((oldContent) => {
         const newContent = [...oldContent]
 
-        const text = `Unknown command: ${command}`
-        newContent.push(createTerminalContent({ type: 'output', text }))
+        const text = `Unknown command: ${command}\n\n`
+        newContent.push(createContentBlock({ elements: [{ type: 'text', text }] }))
 
         return newContent
       })
     }
   }
 
-  const renderElement = ({ id, type, isActive, text, delay }: TerminalContent): ReactElement => {
-    if (type === 'input') {
-      return <Input key={id} {...{ execute, isActive, text }} />
-    } else if (type === 'output') {
-      return <Output key={id} {...{ text, delay, isActive, onFinish: onFinishOutput }} />
-    }
-
-    return <></>
-  }
-
   return (
     <div className={styles.display} id="display">
       <div className={styles.scanline} />
-      <div className={styles.content}>{content.map((el) => renderElement(el))}</div>
+      <Content {...{ content, setContent, execute }} />
+      <Menu {...{ content, setContent, execute }} />
     </div>
   )
 }

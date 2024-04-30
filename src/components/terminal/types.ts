@@ -1,24 +1,50 @@
-export type TerminalContentType = 'output' | 'input'
+import { Dispatch, SetStateAction } from 'react'
+export type ElementType = 'text' | 'input' | 'button' | 'link'
 
-export type TerminalContent = {
+export type Text = {
+  type: 'text'
   id: number
-  type: TerminalContentType
-  isActive: boolean
   text?: string
-  isScript?: boolean
   delay?: number
-  callback?: () => void
 }
 
-export type TerminalContentArgs = {
-  type?: TerminalContentType
-  isActive?: boolean
+export type Input = {
+  type: 'input'
+  id: number
   text?: string
+}
+
+export type Button = {
+  type: 'button'
+  id: number
+  text: string
+  onPress: () => void
+}
+
+export type Link = {
+  type: 'link'
+  id: number
+  href: string
+  text: string
+}
+
+export type OutputElement = Text | Input | Button | Link
+
+export type ContentBlock = {
+  id: number
+  isActive: boolean
   isScript?: boolean
-  delay?: number
-  callback?: () => void
+  onFinishOutput?: () => void
+  elements: OutputElement[]
+}
+
+export type CreateContentBlockArgs = {
+  isActive?: boolean
+  isScript?: boolean
+  onFinishOutput?: () => void
+  elements?: (Omit<Text, 'id'> | Omit<Input, 'id'> | Omit<Button, 'id'> | Omit<Link, 'id'>)[]
 }
 
 export type CommandArgs = {
-  setContent: (...args: any[]) => any
+  setContent: Dispatch<SetStateAction<ContentBlock[]>>
 }

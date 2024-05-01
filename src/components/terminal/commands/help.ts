@@ -3,7 +3,7 @@ import { CommandArgs } from '../types'
 
 export const help = ({ setContent }: CommandArgs): void => {
   const text = `Available commands:
-help, clear, whoami, contact, install, make_coffee, reboot
+help, whoami, contact, install, make_coffee, clear, reboot
 
 `
 

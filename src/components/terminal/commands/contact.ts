@@ -2,27 +2,6 @@ import { createContentBlock } from '../utils'
 import { CommandArgs } from '../types'
 
 export const contact = ({ setContent }: CommandArgs): void => {
-  /*
-  const text = `
-Social links
-
-GitHub    https://github.com/vladimir-vovk
-LinkedIn  https://linkedin.com/in/vvovk
-Twitter   https://twitter.com/vladimir_vovk
-Telegram  https://t.me/vovk_vladimir
-
-Blog      https://dev.to/vladimirvovk
-
-Experiments
-
-Expo Template   https://github.com/vladimir-vovk/expo-ts
-Cats Word Game  https://cats-word-game.vovk.in/
-Fox-pet Game    https://vpet.vovk.in/
-
-Find more on the GitHub... ~(=^‥^)
-
-`
-*/
   setContent((oldContent: any) => {
     return [
       ...oldContent,
@@ -30,7 +9,11 @@ Find more on the GitHub... ~(=^‥^)
         elements: [
           {
             type: 'text',
-            text: 'Social links\n\n'
+            text: '\nSocial links\n'
+          },
+          {
+            type: 'text',
+            text: '------------\n\n'
           },
           {
             type: 'text',
@@ -49,15 +32,6 @@ Find more on the GitHub... ~(=^‥^)
             type: 'link',
             href: 'https://linkedin.com/in/vvovk',
             text: '[https://linkedin.com/in/vvovk]'
-          },
-          {
-            type: 'text',
-            text: '\nTwitter   '
-          },
-          {
-            type: 'link',
-            href: 'https://twitter.com/vladimir_vovk',
-            text: '[https://twitter.com/vladimir_vovk]'
           },
           {
             type: 'text',
@@ -83,7 +57,11 @@ Find more on the GitHub... ~(=^‥^)
           },
           {
             type: 'text',
-            text: '\n\nExperiments\n\n'
+            text: '\n\nExperiments\n'
+          },
+          {
+            type: 'text',
+            text: '-----------\n\n'
           },
           {
             type: 'text',

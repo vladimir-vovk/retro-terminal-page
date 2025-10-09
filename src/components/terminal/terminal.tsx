@@ -14,7 +14,8 @@ import {
   contact,
   makeCoffee,
   whoami,
-  reboot
+  reboot,
+  date
 } from './commands'
 
 const commands: Record<string, (...args: any[]) => void> = {
@@ -25,7 +26,8 @@ const commands: Record<string, (...args: any[]) => void> = {
   contact,
   make_coffee: makeCoffee,
   whoami,
-  reboot
+  reboot,
+  date
 }
 
 const initialContent: ContentBlock[] = [

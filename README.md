@@ -7,6 +7,8 @@ Retro terminal style personal web page built with Next.js.
 
 <img src="./screen.gif" width="400"></img>
 
+[vladimir.vovk.in](https://vladimir.vovk.in/)
+
 ## Quick start
 
 1. Change directory to the project with `cd retro-terminal-page` command.

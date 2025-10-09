@@ -32,10 +32,11 @@ Welcome to my personal web page!
   }
 
   isWaiting = true
-  text = `Initializing ...
-  - Loading memes... Done
-  - Loading cats... Done
-  - Loading coffee... Done
+  text = `Initializing .....
+
+  - Loading memes...  [done]
+  - Loading cats...   [done]
+  - Loading coffee... [done]
 
 Enjoy your stay!
 

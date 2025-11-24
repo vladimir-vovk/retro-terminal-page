@@ -16,7 +16,7 @@ export const Posts = async () => {
       </p>
 
       {posts.map((post: PostMetaData) => (
-        <PostPreview {...post} />
+        <PostPreview {...post} key={post.slug} />
       ))}
     </>
   )

@@ -1,0 +1,108 @@
+---
+slug: 'absolute-path-imports-with-typescript-and-nodejs'
+title: 'Absolute Path Imports with Typescript and Node.js'
+desc: "With absolute path imports, we can do `import { functionA } from 'src/modules/moduleA'`. Notice that the path starts with `src` instead of `../../..` dots when we use relative paths."
+createdAt: '2025-03-31'
+coverImage: '/images/2025-03-31/cover.webp'
+---
+
+With absolute path imports, we can do `import { functionA } from 'src/modules/moduleA'`. Notice that the path starts with `src` instead of `../../..` dots when we use relative paths.
+
+## Set Up
+
+Let's create a new Node.js project:
+
+```bash
+mkdir node-ts
+cd node-ts
+npm init -y
+```
+
+And install dependencies we will need:
+```bash
+npm install --dev typescript tsx tsc-alias
+```
+
+To use Typescript, we must create a `tsconfig.json` configuration file. Let's create a default configuration with:
+```bash
+npx tsc --init
+```
+And a separate directory for all our source files:
+```bash
+mkdir src
+```
+
+Now we can set the `paths` Typescript parameter to use absolute path imports:
+```json
+{
+  "compilerOptions": {
+  ...
+    "paths": {
+      "src/*": ["./src/*"]
+    },
+  }
+}
+```
+
+Also, let's set parameters that we will need to compile our Typescript files:
+```json
+{
+  "compilerOptions": {
+    ...
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  ...
+  "include": ["src/**/*.ts"],
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "verbose": false
+  }
+}
+```
+
+We also added the `tsc-alias` command config. The `tsc-alias` command will replace all absolute paths with relative ones (to make Node.js happy). The `resolveFullPaths: true` parameter will add the `.js` at the end of imports. E.g. `import { log } from 'src/utils'` will transform to `import { log } from './utils.js'`. Otherwise, we will get the `Cannot find module` runtime error (which is weird in my opinion). Please read [this Stack Overflow thread](https://stackoverflow.com/questions/62619058/appending-js-extension-on-relative-import-statements-during-typescript-compilat/76678279#76678279) to learn more.
+
+Now, it's time to add some useful commands to the `package.json`:
+```json
+{
+  ...
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc && tsc-alias",
+    "start": "node ./dist/main.js"
+  },
+  ...
+}
+```
+
+The `dev` script will run Typescript in watch mode, so every time we update our source code, it will restart automatically.
+
+The `build` script will compile all files from the `src` folder and output the result into the `dist` folder.
+
+The `start` command will run our app in production.
+
+## Test
+
+Let's write some code and test our config. Create the `src/utils/log.ts` file:
+```typescript
+export const sayHello = (name: string) => {
+  console.log(`Hello, ${name}!`)
+}
+```
+
+Now that we have the `sayHello` function defined, let's call it from `src/main.ts`:
+```typescript
+import { sayHello } from 'src/utils/log.ts'
+
+sayHello('world')
+```
+
+Run the `npm run dev` command to see the famous `Hello, world!` phrase. 🎉
+
+
+Happy hacking! 💻
+
+## Credits
+
+Photo by <a href="https://unsplash.com/@ugnehenriko?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Ugne Vasyliute</a> on <a href="https://unsplash.com/photos/green-forest-during-daytime-Dag9cv89jb4?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>.

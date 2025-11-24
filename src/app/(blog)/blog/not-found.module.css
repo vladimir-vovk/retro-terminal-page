@@ -1,0 +1,14 @@
+.wrapper {
+  text-align: center;
+  flex: 1;
+}
+
+.wrapper h1 {
+  margin-bottom: 1rem;
+}
+
+.image {
+  font-size: 0.4rem;
+  line-height: 0.5rem;
+  margin: 4rem 0 1rem 1rem;
+}

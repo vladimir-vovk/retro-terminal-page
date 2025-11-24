@@ -1,0 +1,5 @@
+.themeButton {
+  background: var(--color-background);
+  border-width: 0;
+  color: var(--color-text);
+}

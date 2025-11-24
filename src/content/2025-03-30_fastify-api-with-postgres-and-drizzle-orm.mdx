@@ -1,0 +1,444 @@
+---
+slug: 'fastify-api-with-postgres-and-drizzle-orm'
+title: 'Fastify API with Postgres and Drizzle ORM'
+desc: 'Fastify is a fast and low overhead web framework highly focused on providing the best developer experience with the least overhead and a powerful plugin architecture.
+'
+createdAt: '2025-03-30'
+coverImage: '/images/2025-03-30/cover.webp'
+---
+
+Before we start, we will need [Node.js](https://nodejs.org) installed.
+
+## General Setup
+
+Let's create a new directory for our API first:
+```bash
+mkdir fastify-api
+cd fastify-api
+```
+
+Now, we need to initialize a new project:
+```bash
+npm init -y
+```
+
+And install dependencies:
+```bash
+npm install drizzle-orm pg pino pino-pretty fastify @fastify/env dotenv
+```
+
+Also, we will need some packages for development:
+```bash
+npm install --dev typescript tsx drizzle-kit @types/pg tsc-alias
+```
+
+## TypeScript
+
+As we want to use TypeScript, we must create a `tsconfig.json` configuration file. Let's create a default configuration with:
+```bash
+npx tsc --init
+```
+
+It's good to have all source files in one place. So, let's create a `src` folder for all our code:
+```bash
+mkdir src
+```
+
+Now that we have the `src` folder, it will be nice to use "absolute" path imports. E.g. `import { funcA } from 'src/modules/moduleA'`. Notice that the path starts with `src` instead of `../../..` dots when we use "relative" paths. Let's add the `baseUrl` parameter to our `tsconfig.json`:
+```json
+{
+  "compilerOptions": {
+    ...
+    "baseUrl": "./"
+}
+```
+
+Awesome! We have just a couple of options left to be able to compile our TypeScript files:
+```json
+{
+  "compilerOptions": {
+    ...
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  ...
+  "include": ["src/**/*.ts"]
+}
+```
+
+Let's add `build` and `start` commands to our `package.json`:
+```json
+{
+  ...
+  "scripts": {
+    ...
+    "build": "tsc -p tsconfig.json && tsc-alias",
+    "start": "node ./dist/main.js"
+  }
+}
+```
+
+> ❗ Note the `tsc-alias` command. It will replace absolute paths with relative paths after the typescript compilation.
+
+Huh! It looks like we are ready to write some code. Let's create the `main.ts` file inside the `src` directory:
+```typescript
+console.log('Hello, world!')
+```
+
+To be able to run this file, we need to add another command to the `package.json`:
+```json
+{
+  ...
+  "scripts": {
+    ...
+    "dev": "tsx watch src/main.ts"
+  }
+}
+```
+
+Hurray! Now, we can run our code with the `npm run dev` command.
+
+## Fastify Server
+
+Let's create a Fastify server inside the `src/server.ts` file:
+```typescript
+import Fastify from 'fastify'
+
+export const createServer = async () => {
+  const fastify = Fastify({
+    logger: true,
+  })
+
+  fastify.get('/ping', (request, reply) => {
+    reply.send({ message: 'pong' })
+  })
+
+  return fastify
+}
+```
+
+Now, we need to update the `src/main.ts` to run the server:
+```typescript
+import { createServer } from 'src/server'
+
+const main = async () => {
+  const fastify = await createServer()
+  const port = 3000
+
+  try {
+    fastify.listen({ port }, () => {
+      fastify.log.info(`Listening on ${port}...`)
+    })
+  } catch (error) {
+    fastify.log.error('fastify.listen:', error)
+    process.exit(1)
+  }
+}
+
+main()
+```
+
+To check the server, open the browser and navigate to the `localhost:3000/ping`. We should see the `{ message: 'pong' }` response. 🎉
+
+### Environment Variables
+
+We set the server port to `3000`, which could be a problem if we deploy our service to a Cloud Application Platform (port will be assigned by the platform in this case). Let's use environment variables to get the port number and other parameters.
+
+We will set environment variables with the `.env` file. Let's create the `.env` file inside our project directory:
+```bash
+DATABASE_URL='Our database URL. We will set it later'
+PINO_LOG_LEVEL=debug
+NODE_ENV=development
+```
+
+To be able to load this file, Fastify has a nice [@fastify/env](https://github.com/fastify/fastify-env) plugin. This plugin allows you to set the schema for environment variables and will check that all environment variables are set correctly. But it's only available with Fastify or Request instance, so we will use the `dotenv` package in "other" cases.
+
+Let's add the `@fastify/env` plugin configuration to the `src/server.ts`:
+```typescript
+...
+import env from '@fastify/env'
+
+const schema = {
+  type: 'object',
+  required: ['PORT', 'DATABASE_URL'],
+  properties: {
+    PORT: {
+      type: 'string',
+      default: 3000,
+    },
+    DATABASE_URL: {
+      type: 'string',
+    },
+    PINO_LOG_LEVEL: {
+      type: 'string',
+      default: 'error',
+    },
+    NODE_ENV: {
+      type: 'string',
+      default: 'production',
+    },
+  },
+}
+
+const options = {
+  schema: schema,
+  dotenv: true,
+}
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    config: {
+      PORT: string
+      DATABASE_URL: string
+      PINO_LOG_LEVEL: string
+      NODE_ENV: string
+    }
+  }
+}
+
+export const createServer = async () => {
+  const fastify = Fastify({
+    logger: true,
+  })
+
+  /* Register plugins */
+  await fastify.register(env, options).after()
+
+  ...
+}
+```
+
+And get the port number inside `main.ts`:
+```typescript
+...
+
+const main = async () => {
+  const fastify = await createServer()
+  const port = Number(fastify.config.PORT)
+
+...
+```
+
+## Pino Logger
+
+We did enable logger before inside the `createServer` function:
+```typescript
+  ...
+  const fastify = Fastify({
+    logger: true,
+  })
+  ...
+```
+
+And we can use it with the `fastify.log` or `request.log` functions. But if we want to use it "outside" of Fastify or Request instances, we need to create a separate logger instance and export it.
+
+Let's create the `src/utils/logger.ts` file:
+```typescript
+import pino, { Level } from 'pino'
+
+export { Level }
+
+type CreateLoggerArgs = {
+  level: Level
+  isDev: boolean
+}
+
+export const createLogger = ({ level, isDev }: CreateLoggerArgs) =>
+  pino({
+    level,
+    redact: ['req.headers.authorization'],
+    formatters: {
+      level: (label) => {
+        return { level: label.toUpperCase() }
+      },
+    },
+    ...(isDev && { transport: { target: 'pino-pretty' } }),
+  })
+```
+
+Now we can use it in `createServer.ts`:
+```typescript
+import dotenv from 'dotenv'
+import { createLogger, Level } from 'src/utils/logger'
+
+...
+
+dotenv.config()
+
+const level = process.env.PINO_LOG_LEVEL as Level
+const isDev = process.env.NODE_ENV === 'development'
+const logger = createLogger({ level, isDev })
+
+export { logger }
+
+export const createServer = async () => {
+  const fastify = Fastify({
+    loggerInstance: logger,
+  })
+
+...
+```
+
+We are using the `dotenv` package here to load environment variables because we can't access the Fastify instance. Then, create the logger instance, export it, and assign it to Fastify.
+
+## Drizzle ORM
+
+Let's create `src/db/index.ts`:
+```typescript
+import { Pool } from 'pg'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: true,
+})
+
+export const db = drizzle(pool)
+```
+
+Now, we need a schema. Create the `src/db/schema.ts`:
+```typescript
+import {
+  pgTable,
+  timestamp,
+  uuid,
+  varchar,
+  text,
+} from 'drizzle-orm/pg-core'
+
+const timestamps = {
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+}
+
+export const posts = pgTable('posts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 256 }).notNull(),
+  content: text('text').notNull(),
+  ...timestamps,
+})
+```
+
+Before we can create a migration for our schema, we need to create a `drizzle.config.ts` configuration inside the project root:
+```typescript
+import dotenv from 'dotenv'
+import { defineConfig } from 'drizzle-kit'
+
+dotenv.config()
+
+export default defineConfig({
+  out: './migrations',
+  schema: './src/db/schema.ts',
+  breakpoints: false,
+  dialect: 'postgresql',
+  dbCredentials: {
+    url: process.env.DATABASE_URL as string,
+  },
+})
+```
+
+And add new scripts to `package.json`:
+```json
+{
+  ...
+  "scripts": {
+    ...
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+...
+}
+```
+
+Let's create our first migration with:
+```bash
+npm run db:generate
+```
+
+We will need a real database to apply migrations and store our data. You can install Postgres on your machine or use a Cloud Platform like [Neon](https://neon.tech), [Render](https://render.com), etc.
+
+> ❗ Please set the `DATABASE_URL` parameter inside the `.env` configuration file.
+
+Let's apply migration to the database:
+```bash
+npm run db:migrate
+```
+
+Now that the `posts` table is created, we can start to query our data.
+
+## Posts Route
+
+We will start from the database query. Let's create the `src/modules/posts/db.ts` file:
+```typescript
+import { desc } from 'drizzle-orm'
+import { db } from 'src/db'
+import { posts } from 'src/db/schema'
+
+export const getPosts = async () => {
+  const result = await db
+    .select()
+    .from(posts).
+    .orderBy(desc(posts.createdAt))
+    .limit(10)
+
+  return result
+}
+```
+
+> ❗ We are selecting the last 10 posts. It's better to implement pagination here instead.
+
+Now we can create the `/posts` endpoint handler inside the `src/modules/posts/handler.ts`:
+```typescript
+import { FastifyReply, FastifyRequest } from 'fastify'
+import { getPosts } from './db'
+
+export const getPostsHandler = async (
+  request: FastifyRequest,
+  reply: FastifyReply,
+) => {
+  const data = await getPosts()
+
+  return { data }
+}
+```
+
+Let's add the `getPostsHandler` to the `src/modules/posts/router.ts`:
+```typescript
+import { FastifyInstance } from 'fastify'
+import { getPostsHandler } from './handler'
+
+export const postsRouter = (fastify: FastifyInstance) => {
+  fastify.get('/', getPostsHandler)
+}
+```
+
+Now, we can add the "posts router" to our server. Let's update the `server.ts`:
+```typescript
+...
+
+  fastify.get('/ping', (request, reply) => {
+    reply.send({ message: 'pong' })
+  })
+
+  /* Add the posts router under the `ping` endpoint */
+  fastify.register(postsRouter, { prefix: 'api/posts' })
+
+...
+```
+
+We are using the `api/posts` prefix, so our posts will be available with the `localhost:3000/api/posts` URL.
+
+## Conclusion
+
+We have learned how to create a Fastify API server and query data from a PostgreSQL database with Drizzle ORM.
+
+Please feel free to use this setup as a foundation for your next app and happy hacking! 💻
+
+## Credits
+
+Photo by <a href="https://unsplash.com/@dawson2406?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Stephen Dawson</a> on <a href="https://unsplash.com/photos/turned-on-monitoring-screen-qwtCeJ5cLYs?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>.

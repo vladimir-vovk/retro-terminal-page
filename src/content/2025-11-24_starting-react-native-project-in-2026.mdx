@@ -1,0 +1,420 @@
+---
+slug: 'starting-react-native-project-in-2026'
+title: 'Starting React Native Project in 2026'
+desc: "We will use Expo's `create-expo-app` command recommended by the [docs](https://reactnative.dev/docs/environment-setup#start-a-new-react-native-project-with-expo). Also, we will add ESLint, Prettier, and some custom configurations that will make our development process better."
+createdAt: '2025-11-24'
+coverImage: '/images/2025-11-24/cover.webp'
+---
+
+> Updated to [Expo 54](https://expo.dev/changelog/sdk-54).
+
+We will use Expo's `create-expo-app` command recommended by the [docs](https://reactnative.dev/docs/environment-setup#start-a-new-react-native-project-with-expo).
+
+Also, we will add ESLint, Prettier, and some custom configurations that will make our development process better.
+
+> **TLDR** You can use one command `npx create-expo-app -t expo-ts` to create a new React Native project with all tools already set up (see [README](https://github.com/vladimir-vovk/expo-ts) for details) or follow instructions below. 🤓
+
+Please refer to the official [React Native](https://reactnative.dev/docs/environment-setup) and [Expo](https://docs.expo.dev/get-started/set-up-your-environment/) documentation for more details. 🤩
+
+## General setup
+
+We will need the [Node.js](https://nodejs.org) and [Git](https://git-scm.com/downloads) installed before we start.
+
+Please check the [docs](https://docs.expo.dev/get-started/set-up-your-environment/) to ensure everything is installed on your machine.
+
+Now let's create a new app.
+
+1. Run `npx create-expo-app@latest --template blank-typescript` command.
+2. Type your project name.
+3. Change the directory to your project with `cd <your-project-name>` command.
+4. Run `npm run start` to start Metro Bundler.
+5. Press `i` to start the iOS simulator or `a` to run the Android emulator.📱
+
+### Absolute path imports
+
+To use absolute path imports, e.g. `import { ComponentA } from 'src/components/A'` (notice path starts with `src`), we need to add `baseUrl` parameter to the `compilerOptions` of `tsconfig.json`.
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": "./"
+  },
+  ...
+}
+```
+
+### Move App.tsx to src folder
+
+It's good to have all source files in one place. So let's move `App.tsx` to `src` with `mv App.tsx src` command.
+
+Next, we need to change the `index.ts` file inside our project's root to load the `App` component from the `src` folder:
+```ts
+import { registerRootComponent } from 'expo'
+
+import App from 'src/App'
+
+registerRootComponent(App)
+```
+
+### Check code for errors
+
+We can use [TypeScript compiler](https://www.typescriptlang.org/tsconfig/#noEmit) and [ESLint](https://eslint.org/) for this.
+
+#### TypeScript Compiler
+
+Let's add a new `check-typescript` script to our `package.json`.
+
+```json
+...
+"scripts": {
+  ...
+  "check-typescript": "tsc --noEmit"
+},
+...
+```
+
+Now we can run the `npm run check-typescript` command to check our code for errors with the TypeScript compiler.
+
+#### ESLint
+
+[ESLint](https://docs.expo.dev/guides/using-eslint/) is a JavaScript linter that helps you find and fix errors in your code. It's a great tool to help you write better code and catch mistakes before they make it to production. In conjunction, you can use [Prettier](https://prettier.io), a code formatter that ensures all the code files follow a consistent styling.
+
+```bash
+npx expo lint
+```
+
+> If you're using VS Code, install the [ESLint extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) to lint your code as you type.
+
+Add a new `check-eslint` script to our `package.json`.
+
+```json
+...
+"scripts": {
+  ...
+  "check-eslint": "eslint './src/**/*{js,ts,jsx,tsx}'"
+},
+...
+```
+
+Now we can run the `npm run check-eslint` command to check our code for errors with ESLint. And `npm run check-eslint --fix` to fix errors automatically.
+
+#### Lint script
+
+Let's combine TypeScript and ESLint checks so we can run both at once.
+
+Add a new `lint` script to our `package.json`.
+
+```json
+...
+"scripts": {
+  ...
+  "lint": "npm run check-typescript && npm run check-eslint"
+},
+...
+```
+
+### Prettier
+
+[Prettier](https://prettier.io/) is an opinionated code formatter. Let's install it.
+
+```bash
+npx expo install -- --save-dev prettier
+```
+
+We will also need `.prettierrc.js` config file in the project root.
+
+```js
+module.exports = {
+  semi: false,
+  trailingComma: 'none',
+  singleQuote: true,
+  printWidth: 100,
+  tabWidth: 2,
+  useTabs: false,
+}
+```
+
+### Sort imports
+
+Unsorted imports look ugly. Also, it could be hard to read and add new imports. So why not sort them automatically? We can do it with [trivago/prettier-plugin-sort-imports](https://github.com/trivago/prettier-plugin-sort-imports).
+
+```bash
+npm install --save-dev @trivago/prettier-plugin-sort-imports
+```
+
+Add plugin configuration to the Prettier config `.prettierrc.js`:
+
+```js
+module.exports = {
+  // ... prettier config here
+
+  plugins: ['@trivago/prettier-plugin-sort-imports'],
+  importOrderSeparation: true,
+  importOrderSortSpecifiers: true,
+  importOrderCaseInsensitive: true,
+  importOrder: [
+    '<THIRD_PARTY_MODULES>',
+    // '^(.*)/components/(.*)$', // Add any folders you want to be separate
+    '^src/(.*)$',
+    '^(.*)/(?!generated)(.*)/(.*)$', // Everything not generated
+    '^(.*)/generated/(.*)$', // Everything generated
+    '^[./]' // Absolute path imports
+  ]
+}
+```
+
+Add a new `prettier` script to our `package.json`.
+
+```json
+...
+"scripts": {
+  ...
+  "prettier": "prettier --plugin '@trivago/prettier-plugin-sort-imports' --log-level error --no-error-on-unmatched-pattern --write src/**/*.{js,ts,jsx,tsx}"
+  },
+...
+```
+
+### Changelog
+
+We can use the [standard-version](https://github.com/conventional-changelog/standard-version) tool to generate a changelog, bump the version of the app, and create a new tag automatically.
+
+How It Works:
+
+- Follow the [Conventional Commits Specification](https://www.conventionalcommits.org/en/v1.0.0/) in your repository.
+- When you're ready to release, run `standard-version`.
+
+```bash
+npm install --save-dev standard-version
+``` 
+
+Create the `.versionrc.js` config:
+
+```js
+module.exports = {
+  types: [
+    { type: 'feat', section: 'New features' },
+    { type: 'fix', section: 'Bug fixes' },
+    { type: 'change', section: 'Changes' },
+    { type: 'chore', hidden: true },
+    { type: 'docs', hidden: true },
+    { type: 'style', hidden: true },
+    { type: 'perf', hidden: true },
+    { type: 'test', hidden: true }
+  ]
+}
+``` 
+
+We enabled the `feat`, `fix`, and `change` commit types. If you want to enable the other commit types, you can remove the `hidden` boolean and replace it with the `section` string, and provide a title.
+
+Add new `release` script to `package.json`:
+
+```json
+...
+"scripts": {
+  ...
+  "release": "standard-version"
+},
+...
+```
+
+Now we can run the `npm run release` command to get the changelog.
+
+### Husky
+
+> [Husky](https://github.com/typicode/husky) improves your commits and more 🐶 _woof_!
+
+We will use Husky to check if our commit messages follow the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) rules, run the lint check, and format staged code with Prettier and ESLint.
+
+```bash
+npm install --save-dev husky
+npm install --save-dev @commitlint/config-conventional @commitlint/cli
+npm install --save-dev lint-staged
+```
+
+Create a config for `commitlint` with `commitlint.config.js` file:
+
+```js
+module.exports = {
+  extends: ['@commitlint/config-conventional']
+}
+```
+
+Setup lint-staged with `package.json > lint-staged` configuration:
+
+```json
+...
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "eslint './src/**/*{js,ts,jsx,tsx}' --fix",
+      "prettier --write './src/**/*{js,ts,jsx,tsx}'"
+    ]
+  },
+...
+```
+
+We can add the "no-console" rule to the `eslint.config.js` to check that no `console.log`s are committed:
+
+```js
+module.exports = defineConfig([
+  ...
+  /* for lint-staged */
+  {
+    globals: {
+      __dirname: true
+    },
+    rules: {
+      'no-console': 'error'
+    }
+  }
+  ...
+])
+
+```
+
+Configure Husky with:
+
+```bash
+npx husky init
+```
+
+> The `init` command simplifies setting up Husky in a project. It creates a `pre-commit` script in `.husky/` and updates the prepare script in `package.json`.
+
+To add a pre-commit hook we need to replace everything inside the `.husky/pre-commit` file with:
+
+```bash
+npx --no-install lint-staged
+```
+
+To add a commit message hook we need to create the `.husky/commit-msg` file with:
+
+```bash
+npm run lint && npx --no-install commitlint --edit "$1"
+```
+
+### SafeAreaContext
+
+> [react-native-safe-area-context](https://docs.expo.dev/versions/latest/sdk/safe-area-context/) provides a flexible API for accessing device-safe area inset information.
+
+```bash
+npx expo install react-native-safe-area-context
+```
+
+Wrap your `App.tsx -> App` component with `SafeAreaProvider`:
+```typescript
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+
+export default function App() {
+  return <SafeAreaProvider>...</SafeAreaProvider>
+}
+```
+
+And now we can use the `SafeAreaView` component.
+> `SafeAreaView` is a regular `View` component with the safe area insets applied as padding or margin.
+
+### Test with Jest and React Native Testing Library
+
+> [Jest](https://docs.expo.dev/guides/testing-with-jest) is a delightful JavaScript Testing Framework with a focus on simplicity.
+
+```bash
+npx expo install jest-expo jest @types/jest --dev
+```
+
+Update the `package.json` to include:
+
+```json
+"scripts": {
+  ...
+  "test": "jest"
+}
+```
+
+Jest has a number of globally-available functions, so we need to introduce these functions to ESLint with [eslint-plugin-jest](https://github.com/jest-community/eslint-plugin-jest).
+
+```bash
+npm install --save-dev eslint-plugin-jest
+```
+
+Add `'jest'` to the `plugins` section of the `eslint.config.js` configuration file. We can omit the `eslint-plugin-` prefix:
+
+```js
+module.exports = defineConfig([
+  ...
+  {
+    plugins: ['jest']
+  }
+])
+```
+
+> The [React Native Testing Library](https://github.com/callstack/react-native-testing-library) helps you to write better tests with less effort and encourages good testing practices.
+
+```bash
+npm install --save-dev @testing-library/react-native
+npm install --save-dev @testing-library/dom
+```
+
+Now it is time to add the `jest.config.js` configuration file:
+
+```js
+/** @type {import('jest').Config} */
+const path = require('path')
+
+const config = {
+  preset: 'jest-expo',
+  setupFilesAfterEnv: [path.join(__dirname, 'setup-testing.js')],
+  transformIgnorePatterns: [
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)'
+  ],
+  moduleDirectories: ['node_modules', '<rootDir>']
+}
+
+module.exports = config
+```
+
+Let's also add [eslint-plugin-testing-library](https://github.com/testing-library/eslint-plugin-testing-library) and [eslint-plugin-jest-dom](https://github.com/testing-library/eslint-plugin-jest-dom). Both are ESLint plugins that help to follow best practices and anticipate common mistakes when writing tests with Testing Library. For more info, see the excellent [Common mistakes with React Testing Library](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library#not-using-testing-library-eslint-plugins) article by Kent C. Dodds. 🤓
+
+```bash
+npm install --save-dev eslint-plugin-testing-library
+npm install --save-dev eslint-plugin-jest-dom
+```
+
+Add `'testing-library'` to the `plugins` section and `'plugin:testing-library/react'` to the `extends` section of our `eslint.config.js` configuration file:
+
+```js
+module.exports = defineConfig([
+  ...
+  {
+    extends: ['plugin:testing-library/react', 'plugin:jest-dom/recommended'],
+    plugins: ['testing-library']
+  }
+])
+```
+
+Now we can write our first test to the `src/App.test.tsx` file:
+
+```tsx
+import { render, screen } from '@testing-library/react-native'
+
+import App from 'src/App'
+
+describe('App', () => {
+  it('should mount without errors', () => {
+    expect(() => render(<App />)).not.toThrow()
+  })
+
+  it('should unmount without errors', () => {
+    render(<App />)
+    expect(() => screen.unmount()).not.toThrow()
+  })
+})
+```
+
+And run it with the `npm run test` command.
+
+## Credits
+
+Photo by <a href="https://unsplash.com/@billjelen?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Bill Jelen</a> on <a href="https://unsplash.com/photos/space-shuttle-woWf_VJ7dNs?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>.
+
+---
+Please fork the [repo](https://github.com/vladimir-vovk/expo-ts) and add your favorite tools.
+
+Happy hacking! 🙌🏻

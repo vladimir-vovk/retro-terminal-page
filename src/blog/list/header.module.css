@@ -1,0 +1,23 @@
+.logo {
+  line-height: 0.4rem;
+  font-size: 0.4rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.link {
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+}
+

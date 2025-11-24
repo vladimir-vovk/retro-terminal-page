@@ -1,0 +1,137 @@
+---
+slug: 'terminal-animations-with-nodejs'
+title: 'Terminal Animations with Node.js'
+desc: 'Node.js has the [process](https://nodejs.org/api/process.html) object with [stdout](https://nodejs.org/api/tty.html) property which is a stream connected to `stdout`. Using the `process.stdout` property, we can access several useful properties and methods: `columns`, `rows`, `cursorTo`, and `write`. These are essentials to start "animate" something in the terminal.'
+createdAt: '2024-12-26'
+coverImage: '/images/2024-12-26/cover.webp'
+---
+
+Node.js has the [process](https://nodejs.org/api/process.html) object with [stdout](https://nodejs.org/api/tty.html) property which is a stream connected to `stdout`. Using the `process.stdout` property, we can access several useful properties and methods: `columns`, `rows`, `cursorTo`, and `write`. These are essentials to start "animate" something in the terminal.
+
+Imagine we want to animate a falling "character" from top to bottom of the screen, which could be a small part of the "digital rain" animation from the Matrix movie.
+
+![Digital Rain Animation](/images/2024-12-26/1.webp)
+
+To do this we will need several steps:
+- Write the character in a starting position.
+- Make a pause.
+- Remove the character.
+- Write the character into a new position.
+- Repeat...
+
+```javascript
+const column = 0
+const character = '$'
+
+/* Pause for 1 second (1000 ms) */
+const pause = () => new Promise((resolve) => setTimeout(resolve, 1000))
+
+const main = async () => {
+  /* Clear screen */
+  console.clear()
+  /* Hide cursor */
+  process.stderr.write('\x1B[?25l')
+
+  /* The number of rows */
+  const rows = process.stdout.rows
+
+  /* Starting from the first row on the top of the screen.
+   * Going to the bottom of the screen `process.stdout.rows`.
+   */
+  for (let row = 0; row < rows; row++) {
+    /* Set cursor into position `cursorTo(x, y)`
+     * and write a character */
+    process.stdout.cursorTo(column, row)
+    process.stdout.write(character)
+    /* Pause for 1 second */
+    await pause()
+    /* Set cursor into position and clear the character
+     * (write a space) */
+    process.stdout.cursorTo(column, row)
+    process.stdout.write(' ')
+  }
+
+  /* Show cursor */
+  process.stderr.write('\x1B[?25h')
+}
+
+main()
+```
+
+![Falling Character Animation](/images/2024-12-26/2.webp)
+You can play with this code [here](https://replit.com/@vladimir_vovk/Falling-Character).
+
+Next, it will be nice to add some colors to our animation. We can use the great [Ansis](https://github.com/webdiscus/ansis) library for that.
+
+Let's output something in green color:
+
+```javascript
+/* import Ansis library */
+import { green } from 'ansis'
+
+const character = '$'
+
+/* Apply green color to our character */
+const coloredCharacter = green`${character}`
+
+/* Write colored character to the terminal */
+process.stdout.write(coloredCharacter)
+```
+
+Or even better animate the color from dark to light green:
+
+```javascript
+import { rgb } from 'ansis'
+
+const column = 0
+const character = '$'
+
+/* Pause for 1 second (1000 ms) */
+const pause = () => new Promise((resolve) => setTimeout(resolve, 1000))
+
+const main = async () => {
+  /* Clear screen */
+  console.clear()
+  /* Hide cursor */
+  process.stderr.write('\x1B[?25l')
+
+  /* The number of rows */
+  const rows = process.stdout.rows
+
+  /* Starting from the first row on the top of the screen.
+   * Going to the bottom of the screen `process.stdout.rows`.
+   */
+  for (let row = 0; row < rows; row++) {
+    /* Use the `rgb` function to change color
+     * from dark to light green */
+    const g = Math.floor((255 / rows) * row)
+    const coloredCharacter = rgb(0, g, 0)`${character}`
+
+    /* Set cursor into position `cursorTo(x, y)`
+     * and write a character */
+    process.stdout.cursorTo(column, row)
+    process.stdout.write(coloredCharacter)
+    /* Pause for 1 second */
+    await pause()
+    /* Set cursor into position and clear the character
+     * (write a space) */
+    process.stdout.cursorTo(column, row)
+    process.stdout.write(' ')
+  }
+
+  /* Show cursor */
+  process.stderr.write('\x1B[?25h')
+}
+
+main()
+```
+
+![Green Color Animation](/images/2024-12-26/3.webp)
+
+We can create something interesting and cool-looking using these simple ideas and animation techniques. 🌟
+
+See the Matrix digital rain in action with the `npx jmatrix` command and check out the source code on [Github](https://github.com/vladimir-vovk/jmatrix).
+
+## Credits
+
+Photo by <a href="https://unsplash.com/@lukash?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Lukas</a> on <a href="https://unsplash.com/photos/a-computer-screen-with-a-lot-of-data-on-it-MU8w72PzRow?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>.

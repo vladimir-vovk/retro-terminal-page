@@ -1,0 +1,68 @@
+---
+slug: 'better-image-placeholders-with-thumbhash'
+title: 'Better Image Placeholders with ThumbHash'
+desc: 'ThumbHash is a very compact representation of a placeholder for an image. Store it inline with your data and show it while the real image is loading for a smoother loading experience.'
+createdAt: '2025-04-14'
+coverImage: '/images/2025-04-14/cover.webp'
+---
+
+Depending on the network speed and image size, loading images may be slow. This could make the page design look ugly, lead to content shifts, and create bad UX.
+
+One way to eliminate this problem is to use image placeholders. We can load very small blurred versions of our images and display them first (using the same size as the original images) while continue loading bigger images.
+
+![Cute kitten](/images/2025-04-14/kitten.webp)
+
+![Small blurred version](/images/2025-04-14/thumbhash.webp)
+
+Introducing the [ThumbHash](https://evanw.github.io/thumbhash/).
+
+> A very compact representation of a placeholder for an image. Store it inline with your data and show it while the real image is loading for a smoother loading experience. It's similar to [BlurHash](https://github.com/woltapp/blurhash) but with the following advantages:
+>- Encodes more detail in the same space
+>- Also encodes the aspect ratio
+>- Gives more accurate colors
+>- Supports images with alpha
+
+We can create the ThumbHash for an image using the [thumbhash](https://github.com/evanw/thumbhash) library or [thumbhash-gen](https://github.com/vladimir-vovk/thumbhash-gen) command-line utility. For example, to create the ThumbHash for the image above, we will need one command:
+
+```bash
+npx thumbhash-gen https://dev-to-uploads.s3.amazonaws.com/uploads/articles/aj3ukzipq9acckn8a9ux.jpg
+```
+
+The result will be a compact hash string `XakJJYI/WFWSaGZ1d/ZXdnlw5gdn` which we can use as a placeholder.
+
+One option is to use a "special" component that supports the ThumbHash format. For example, the [nextjs-thumbhash](https://nextjs-thumbhash.vercel.app/) and [Expo Image](https://docs.expo.dev/versions/latest/sdk/image).
+
+```typescript
+const imageUrl = 'https://dev-to-uploads.s3.amazonaws.com/uploads/articles/aj3ukzipq9acckn8a9ux.jpg'
+const thumbhash = 'XakJJYI/WFWSaGZ1d/ZXdnlw5gdn'
+
+...
+
+<Image
+  src={imageUrl}
+  thumbhash={thumbhash}
+/>
+```
+
+Another option will be to get the "URL data" from ThumbHash using the `thumbhash` library:
+
+```typescript
+const thumbhash = 'XakJJYI/WFWSaGZ1d/ZXdnlw5gdn'
+const urlData = thumbhash.thumbHashToDataURL(Buffer.from(thumbhash, 'base64'))
+// urlData -> 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAA...'
+```
+
+And use it as the `src` attribute for the image:
+
+```html
+<img src={urlData} />
+```
+
+That's it! 🎉
+
+Happy hacking! 💻
+
+## Credits
+
+Photo by <a href="https://unsplash.com/@mike_van_den_bos?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Mike van den Bos</a> on <a href="https://unsplash.com/photos/text-jf1EomjlQi0?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>.<br/>
+Photo by <a href="https://unsplash.com/@andriyko?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Andriyko Podilnyk</a> on <a href="https://unsplash.com/photos/orange-tabby-kitten-in-grasses-RCfi7vgJjUY?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>.

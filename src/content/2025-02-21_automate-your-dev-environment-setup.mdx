@@ -1,0 +1,66 @@
+---
+slug: 'automate-your-dev-environment-setup'
+title: 'Automate Your Dev Environment Setup'
+desc: 'How many hours do you need to set up all your favorite tools on a new machine? What if your colleague or friend wants the same setup and asks you for help? Or maybe you want to change something, but you set it up a long time ago and have no idea what you need to change...'
+createdAt: '2025-02-21'
+coverImage: '/images/2025-02-21/cover.webp'
+---
+
+How many hours do you need to set up all your favorite tools on a new machine? What if your colleague or friend wants the same setup and asks you for help? Or maybe you want to change something, but you set it up a long time ago and have no idea what you need to change...
+
+Thinking of these questions it will be nice:
+- if we can have all configs in one place;
+- easily reproduce our setup on a new machine;
+- easily share configs with other people;
+- be able to look into our config, understand what was done and be able to easily change it.
+
+This problem bothered me for quite some time. I tried automation tools like Salt, Ansible, Nix... but all of them looks too complex and inconvenient for this task:
+- they are designed for different use case - many distributed machines;
+- they are slow;
+- you need to learn a lot before you can use it.
+
+No really, do I need to learn a new language to be able to install some programs and manage my configs? (Hello, Nix! 😬)
+
+Fortunately, I recently came across a [course from mighty ThePrimeagen](https://frontendmasters.com/courses/developer-productivity-v2/) where he suggests using plane `bash` to automate environment setup. 
+
+When I heard that, my first thought was "Bash? No way! I will never use this old and ugly thing"... But maybe I should give it a try if nothing else worked for me..? I tried and suprisingly it worked!
+
+Let us be honest, `bash` is not the "best language" in the world. It looks weird and even scary at first. But it is simple and it is worked perfectly in this case. I was able to write config scripts for all my programs in a couple of hours.
+
+The idea is pretty simple. Let us have one folder for all of our configurations - `~/env-setup`. Inside this folder, we will have `dotfiles` and `scripts`. The `dotfiles` will contain all our configuration files. Each program configuration will have a separate folder, e.g. `nvim`, `nvim-another-config`, `zshell`, `vscode`, etc. Inside the `scripts` folder, we will have our configuration scripts, e.g. `nvim.sh`, `zshell.sh`, `vscode.sh`, etc. Each script will have logic related to a particular program (or set of programs).
+
+For example, let us take a look into `tmux.sh`:
+
+```bash
+#!/usr/bin/env bash
+
+. bash-utils.sh
+
+start "tmux"
+
+log "install tmux.."
+brew install tmux
+
+log "install tmux-plugin-manager..."
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+source="$HOME/env-setup/dotfiles/tmux/.config/tmux/tmux.conf"
+dest="$HOME/.config/tmux/tmux.conf"
+link_config $source $dest
+
+finish
+```
+
+First, we import the `bash-utils.sh` which contains helper functions that we use in all scripts. `start`, `log` and `finish` functions print helper messages to the terminal. `brew install tmux` will install `tmux` program. Then we will install the `tmux plugin manager` with the `git clone` command. After that, we will create a link from the `~/env-setup/dotfiles/tmux` folder into `~/.config/tmux`. So `tmux` will use our configuration instead of a default one. The `link_config` function is "smart" enough to back up our "old" config if exists. Or remove the "old" link if it was created before.
+
+That's it. Pretty simple, right?
+
+In case we want to install all our favorite programs at once we can run the `_setup-all_.sh` script which will just run all scripts one by one.
+
+You can find all files in the [env-setup](https://github.com/vladimir-vovk/env-setup) repo. It is done for MacOS, but I believe we can do the same for Linux and Windows. Please clone it and create your environment setup. 🥳
+
+Happy hacking! 🙌🏻
+
+### Credits
+
+Photo by <a href="https://unsplash.com/@baciutudor?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Tudor Baciu</a> on <a href="https://unsplash.com/photos/flat-screen-monitor-and-black-ceramic-mug-vc3iVL_znJ8?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>.

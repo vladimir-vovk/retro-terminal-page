@@ -52,8 +52,8 @@ export const contact = ({ setContent }: CommandArgs): void => {
           },
           {
             type: 'link',
-            href: 'https://dev.to/vladimirvovk',
-            text: '[https://dev.to/vladimirvovk]'
+            href: '/blog',
+            text: '[https://vladimir.vovk.in/blog]'
           },
           {
             type: 'text',

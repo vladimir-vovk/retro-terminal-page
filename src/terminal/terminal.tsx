@@ -1,4 +1,6 @@
 'use client'
+import clsx from 'clsx'
+import { VT323 } from 'next/font/google'
 import { useEffect, useState } from 'react'
 import styles from './terminal.module.css'
 import { ContentBlock } from './types'
@@ -17,6 +19,8 @@ import {
   reboot,
   date
 } from './commands'
+
+const font = VT323({ weight: '400', subsets: ['latin'] })
 
 const commands: Record<string, (...args: any[]) => void> = {
   '': empty,
@@ -109,7 +113,7 @@ export const Terminal = () => {
   }
 
   return (
-    <div className={styles.display} id="display">
+    <div className={clsx(styles.display, font.className)} id="display">
       <div className={styles.scanline} />
       <Content {...{ content, setContent, execute }} />
       <Menu {...{ content, setContent, execute }} />

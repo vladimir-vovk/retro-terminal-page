@@ -6,7 +6,7 @@ export const Code = (props: any) => {
 
   CodeBright.theme = {
     dark: 'github-dark',
-    light: 'one-dark-pro' // 'github-light'
+    light: 'one-dark-pro'
   }
 
   return (

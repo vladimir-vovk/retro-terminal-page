@@ -216,6 +216,8 @@ code {
 
   @media(max-width: 764px) {
     font-size: 1.15rem;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
   }
 }
 

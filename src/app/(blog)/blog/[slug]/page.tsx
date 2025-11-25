@@ -1,5 +1,12 @@
 import { Post } from '@/blog'
-import { loadBlogPost } from '@/blog/utils'
+import { PostMetaData } from '@/blog/types'
+import { getBlogPosts, loadBlogPost } from '@/blog/utils'
+
+export const generateStaticParams = async () => {
+  const posts = await getBlogPosts()
+
+  return posts.map(({ slug }: PostMetaData) => ({ slug }))
+}
 
 type Props = {
   params: Promise<{ slug: string }>

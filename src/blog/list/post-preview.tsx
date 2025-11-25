@@ -14,7 +14,7 @@ export const PostPreview = ({ title, createdAt, desc, slug, coverImage }: Props)
   return (
     <article className={styles.article}>
       <Link href={postUrl} className={styles.headerLink}>
-        <h1 className={styles.title}>{title}</h1>
+        <h1>{title}</h1>
       </Link>
       <time dateTime={createdAt} className={styles.createdAt}>
         {formatDate(createdAt)}

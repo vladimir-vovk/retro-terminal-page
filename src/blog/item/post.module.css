@@ -1,5 +1,10 @@
 .container {
   container-type: inline-size;
+  margin-bottom: 3rem;
+
+  @media (max-width: 764px) {
+    margin-bottom: 1rem;
+  }
 }
 
 .cover {

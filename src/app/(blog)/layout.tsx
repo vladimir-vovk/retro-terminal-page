@@ -21,7 +21,6 @@ export default function BlogRootLayout({ children }: Props) {
         <body>
           <Header />
           <main>{children}</main>
-          <footer />
         </body>
       </html>
     </ThemeProvider>

@@ -1,6 +1,12 @@
 .logo {
   line-height: 0.4rem;
   font-size: 0.4rem;
+
+  @media(max-width: 764px) {
+    line-height: 0.26rem;
+    font-size: 0.26rem;
+    padding-top: 0.26rem;
+  }
 }
 
 .header {

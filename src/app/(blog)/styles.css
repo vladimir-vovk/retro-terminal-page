@@ -81,6 +81,11 @@ body {
   font-family: var(--font-system);
   font-size: 1.5rem;
   line-height: 2.6rem;
+
+  @media(max-width: 764px) {
+    font-size: 1.4rem;
+    line-height: 2.2rem;
+  }
 }
 
 main {
@@ -90,12 +95,13 @@ main {
   width: 100%;
   max-width: 62rem;
   margin: 0 auto;
+  padding: 0 0.5rem;
 }
 
 header, footer {
   width: 100%;
   max-width: 62rem;
-  padding: 24px 0;
+  padding: 24px 0.5rem;
   margin: 0 auto;
 }
 
@@ -103,12 +109,24 @@ h1 {
   font-size: 3.2rem;
   line-height: 4rem;
   margin-bottom: 1rem;
+
+  @media(max-width: 764px) {
+    font-size: 1.8rem;
+    line-height: 2.6rem;
+    margin-bottom: 0.5rem;
+  }
 }
 
 h2 {
   font-size: 2.6rem;
   line-height: 3.25rem;
   margin-bottom: 1rem;
+
+  @media(max-width: 764px) {
+    font-size: 1.6rem;
+    line-height: 2.4rem;
+    margin-bottom: 0.5rem;
+  }
 }
 
 h3 {
@@ -116,6 +134,12 @@ h3 {
   line-height: 2.6rem;
   margin-top: 2rem;
   margin-bottom: 1rem;
+
+  @media(max-width: 764px) {
+    font-size: 1.4rem;
+    line-height: 2.2rem;
+    margin-bottom: 0.5rem;
+  }
 }
 
 h4 {
@@ -123,6 +147,12 @@ h4 {
   line-height: 2.1rem;
   margin-top: 2rem;
   margin-bottom: 1rem;
+
+  @media(max-width: 764px) {
+    font-size: 1.4rem;
+    line-height: 2rem;
+    margin-bottom: 0.5rem;
+  }
 }
 
 time {
@@ -130,6 +160,10 @@ time {
   font-weight: 500;
   display: flex;
   margin-bottom: 2rem;
+
+  @media(max-width: 764px) {
+    font-size: 1.4rem;
+  }
 }
 
 a {
@@ -138,6 +172,10 @@ a {
 
 p {
   margin-bottom: 1.5rem;
+
+  @media(max-width: 764px) {
+    margin-bottom: 1.2rem;
+  }
 }
 
 p img {
@@ -151,6 +189,10 @@ blockquote {
   border-left-width: 0.3rem;
   padding-left: 1rem;
   margin-bottom: 2rem;
+
+  @media(max-width: 764px) {
+    margin-bottom: 1.2rem;
+  }
 }
 
 blockquote > ul {
@@ -171,6 +213,10 @@ ol {
 
 code {
   font-size: 1.35rem;
+
+  @media(max-width: 764px) {
+    font-size: 1.15rem;
+  }
 }
 
 p code {

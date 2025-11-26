@@ -1,0 +1,88 @@
+---
+slug: 'when-to-use-react-memo-and-react-usecallback-for-performance-optimisation'
+title: 'When to use React.memo and React.useCallback for Performance Optimisation'
+desc: 'Sometimes we can see that people tend to wrap every callback function into useCallback hook and use memo for every component in their app (even for really simple components like buttons). And if you will ask why do they do that, the answer probably will be "to make the app faster". But is it really true?'
+createdAt: '2022-01-30'
+coverImage: '/images/2022-01-30/cover.webp'
+---
+
+## The Problem
+
+Sometimes we can see that people tend to wrap every callback function into `useCallback` hook and use `memo` for every component in their app (even for really simple components like buttons). And if you will ask **why** do they do that, the answer probably will be "to make the app faster". But is it really true?
+
+## Optimising Performance
+
+Let's take a look at the official [Optimising Performance](https://en.reactjs.org/docs/optimizing-performance.html) React document:
+
+> Internally, React uses several clever techniques to minimise the number of costly DOM operations required to update the UI. For many applications, using React will lead to a fast user interface **without doing much work to specifically optimise for performance**.
+
+Also, the common advice for performance optimisation is that we need to [measure performance](https://reactjs.org/docs/optimizing-performance.html#profiling-components-with-the-devtools-profiler) and understand the problem first before we start doing anything. Otherwise, we are doing [Premature Optimisation](https://en.wikipedia.org/wiki/Program_optimization#When_to_optimize) which is an anti-pattern in software development.
+
+> Optimisation can reduce readability and add code that is used only to improve the performance. This may complicate programs or systems, making them harder to maintain and debug. As a result, optimisation or performance tuning is often performed at the end of the development stage.
+
+## React.memo
+
+To decide whether React should update the DOM it will render a component (using [Virtual DOM](https://en.reactjs.org/docs/faq-internals.html)), compare the result with the previous render and if the render results are different then React will update the DOM.
+
+By wrapping a component with `memo` React will render it the first time and memoize the result. And for the next render, if props will be the same, React will reuse the latest rendered result. So we can have a performance boost by reusing a memoized component and skipping a virtual DOM difference check (which is fast).
+
+By default `React.memo` will only shallowly compare complex objects in the props object. If you want control over the comparison, you can also provide a custom comparison function as the second argument.
+
+Also be aware that if a component wrapped in `React.memo` has a `useState`, `useReducer` or `useContext` hook in its implementation, **it will still re-render** when state or context change.
+
+**So, when it is a good idea to use React.memo?**
+
+- A component renders the same result given the same props.
+- It re-renders often.
+- Props do not change much between renders.
+- A component should be complex enough to reason `memo` props equality check.
+
+Remember to always profile before starting any optimisation.
+
+Also measure the benefits of applying `React.memo` to be sure it speeds up your component.
+
+Because the function object equals only to itself, always use `React.useCallback` hook to pass callbacks to memoized components.
+
+**When it is better to avoid React.memo?**
+
+- A component is not heavy and renders with different props.
+- It is a class-based component (extend `PureComponent` and use `shouldComponentUpdate` instead).
+- You can not quantify the performance gains.
+
+Imagine a simple to render component. There is no need to optimise it because it is already fast.
+
+Or a component that usually renders with different props. In this case, memoization does not provide benefits. Because React does an extra job on every rendering: it compares whether the previous and next props are equal. And because they are almost always different React will need to re-render a component anyway. So instead of a speed boost, we will need extra time to compare props.
+
+Also, be aware that memoization costs additional computer memory.
+
+## React.useCallback
+
+According to the [docs](https://en.reactjs.org/docs/hooks-reference.html#usecallback) `React.useCallback` returns a memoized callback.
+
+>This is useful when passing callbacks to optimized child components that rely on **reference equality to prevent unnecessary renders** (e.g. shouldComponentUpdate).
+
+So the `React.useCallback` hook solves the functions equality check problem (remember that the function object equals only to itself).
+
+**Given that, when it is good to use `React.useCallback`?**
+
+- When we need to pass a function prop to a component wrapped with `React.memo`.
+- When a function is a dependency for a hook (e.g. `useEffect(..., [function])`).
+- When a function has an internal state (e.g. debounced or throttled callback).
+
+Does it make sense to apply `useCallback` everywhere? No!
+
+Because for light components, re-rendering does not create performance issues.
+
+And keep in mind that even `useCallback` returns the same function object, still, the inline function, which is passed as a parameter, is re-created on every re-rendering.
+
+By using `useCallback` we also increase our code complexity. And we have to keep the `useCallback` dependencies `useCallback(..., deps)` in sync with what we are using inside the memoized callback. So it is recommended to use the [exhaustive-deps](https://github.com/facebook/react/issues/14920) rule as part of [eslint-plugin-react-hooks](https://www.npmjs.com/package/eslint-plugin-react-hooks#installation) package. It warns when dependencies are specified incorrectly and suggests a fix.
+
+## Conclusion
+
+Always profile before any optimisation. And ask yourself: does the increased performance worth increased complexity?
+
+Happy coding! 👻
+
+## Credits
+
+Photo by <a href="https://unsplash.com/@ciabattespugnose?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Lucrezia Carnelos</a> on <a href="https://unsplash.com/s/photos/memo?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>.

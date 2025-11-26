@@ -1,0 +1,150 @@
+---
+slug: 'learning-flexbox-details-by-building-a-button-in-react-native'
+title: 'Learning Flexbox Details by Building a Button in React Native'
+desc: "Imaging we need to build a simple UI for an article preview with a button. Let's start building it from the button. Why not? 🙃"
+createdAt: '2023-06-05'
+coverImage: '/images/2023-06-05/cover.webp'
+---
+
+Imaging we need to build a simple UI for an article preview. Something like this one:
+
+![Article preview design](/images/2023-06-05/1.webp)
+
+Let's start building it from the bottom. Why not? 🙃
+
+We can use the [Pressable](https://reactnative.dev/docs/pressable) and [Text](https://reactnative.dev/docs/text) components to create the "Learn more" button.
+
+```tsx
+import { Text, Pressable } from 'react-native'
+
+type Props = {
+  children: string
+}
+
+export const Button = ({ children }: Props) => {
+
+  return (
+    <Pressable style={({pressed}) => ({
+      padding: 12,
+      borderWidth: 1,
+      borderRadius: 6,
+      backgroundColor: pressed ? 'lightyellow' : 'white',
+    })}>
+      <Text>{children}</Text>
+    </Pressable>
+  )
+}
+```
+
+Pretty simple, right?
+
+![Button component](/images/2023-06-05/2.webp)
+
+But wait, why is the button stretched full width? 🤔
+
+We did not use the `flex: 1`, `flexGrow: 1`, or `width: '100%'` in our styles. 😬
+
+Let's try to find the answer in the React Native [Flexbox](https://reactnative.dev/docs/flexbox) docs.
+
+![Flex doc](/images/2023-06-05/3.webp)
+
+> `flex` will define how your items are going to “fill” over the available space along your **main** axis.
+
+Ok, `flex` controls only the "main" axis. But what is the "main" axis?
+
+![Flex direction doc](/images/2023-06-05/4.webp)
+
+> `flexDirection` controls the direction in which the children of a node are laid out. This is also referred to as the **main** axis. The **cross** axis is the axis perpendicular to the **main** axis, or the axis which the wrapping lines are laid out in (`flexDirection` is default to `column`).
+
+![The main and cross axises](/images/2023-06-05/5.webp)
+
+So, according to the docs the "main" axis for React Native by default is directed from top to bottom (which is different for the web❗️). It means, that in our case, `flex` and `flexGrow` styles do not affect the width of the button.
+
+And what about the "cross" axis?
+
+![Align items doc](/images/2023-06-05/6.webp)
+
+> `alignItems` describes how to align children along the **cross** axis of their container. It is very similar to `justifyContent` but instead of applying to the **main** axis, `alignItems` applies to the **cross** axis (`alignItems` is default to `stretch`).
+
+Eureka! That is it. As we can see now, for every element we add, the default behaviour for the "cross" axis will be `stretch`. That is why our button is stretched full width.
+
+Let's try to fix it!
+
+To do that, we need to change the "align" style for the "cross" axis, right? Theoretically, we can wrap the `Pressible` component with the `View` component and set the `alignItems` style for the wrapper `View` component to `flex-start`.
+
+```tsx
+import { Text, Pressable, View } from 'react-native';
+
+type Props = {
+  children: string;
+};
+
+export const Button = ({ children }: Props) => {
+  return (
+    <View style={{ alignItems: 'flex-start' }}>
+      <Pressable
+        style={({ pressed }) => ({
+          padding: 12,
+          borderWidth: 1,
+          borderRadius: 6,
+          backgroundColor: pressed ? 'lightyellow' : 'white',
+        })}>
+        <Text>{children}</Text>
+      </Pressable>
+    </View>
+  );
+}
+```
+
+![Learn more button](/images/2023-06-05/7.webp)
+
+Looks good! 😻
+
+But can we do it better without the "extra" `View` component? The answer is yes, we can! 💪
+
+![Align self doc](/images/2023-06-05/8.webp)
+
+> alignSelf has the same options and effect as alignItems but instead of affecting the children within a container, you can apply this property to a single child to change its alignment within its parent.
+
+Wow, that is exactly what we need! 🎉
+
+We just need to apply the `alignSelf: 'flex-start'` style to the `Pressible` component. Let's try it.
+
+```tsx
+import { Text, Pressable } from 'react-native';
+
+type Props = {
+  children: string;
+};
+
+export const Button = ({ children }: Props) => {
+  return (
+    <Pressable
+      style={({ pressed }) => ({
+        padding: 12,
+        borderWidth: 1,
+        borderRadius: 6,
+        backgroundColor: pressed ? 'lightyellow' : 'white',
+        alignSelf: 'flex-start',
+      })}>
+      <Text>{children}</Text>
+    </Pressable>
+  );
+};
+```
+
+![Learn more button](/images/2023-06-05/9.webp)
+
+Yey! It is what we wanted to achieve. 🥳
+
+I feel like we learned a lot just by building a simple button. That's amazing! 😊
+
+You can play with the code using [this](https://snack.expo.dev/@vladimir_vovk/article-preview-example) Expo Snack.
+
+Happy hacking! 🙌🏻
+
+### Credits
+
+Photo by <a href="https://unsplash.com/@kikekiks?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">kike vega</a> on <a href="https://unsplash.com/photos/F2qh3yjz6Jk?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>.
+
+Image by <a href="https://pixabay.com/users/susannp4-1777190/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=2083492">Susann Mielke</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=2083492">Pixabay</a>.

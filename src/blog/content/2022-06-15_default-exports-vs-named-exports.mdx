@@ -1,0 +1,75 @@
+---
+slug: 'default-exports-vs-named-exports'
+title: 'Default Exports vs Named Exports'
+desc: "When comparing default exports with named exports, I think that both methods are good. But I can see some advantages of named exports."
+createdAt: '2022-06-15'
+coverImage: '/images/2022-06-15/cover.webp'
+---
+
+```typescript
+export default function A() {}
+
+// vs
+
+export function A() {}
+```
+
+I think that both methods are good. But I can see some advantages of named exports.
+
+## Named exports will not allow to implicitly change the import name
+
+```typescript
+// No error with default export
+import Button from '../components/Text'
+// now we have a "Button" component
+// which is actually a "Text" component
+
+// TypeScript will throw and error
+// if import and export names don't match
+import { Button } from '../components/Text'
+// we will get an error here
+```
+
+## Named exports are easier to re-export and organise
+
+Imagine we have several UI components inside `components` folder. Each component in a separate file: `components/Header.tsx`, `components/Text.tsx`, `components/Button.tsx`, etc.
+
+Now to be able to import these components as `import { Header, Text, Button } from '../components'` we just need to create the `components/index.ts`.
+
+```typescript
+export * from './Header'
+export * from './Text'
+export * from './Button'
+```
+
+Compare to the default exports where will  need to write:
+```typescript
+export { default as Header } from './Header'
+export { default as Text } from './Text'
+export { default as Button } from './Button'
+```
+
+## Named exports are shorter to write
+
+```typescript
+export function Component() {}
+// or
+export const Component = () => {}
+```
+
+Compared to default exports:
+
+```typescript
+export default function Component() {}
+// or
+const Component = () => {}
+export default Component
+```
+
+---
+
+Happy hacking! 🙌🏻
+
+## Credits
+
+Photo by <a href="https://unsplash.com/@svsokolov?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Sergey Sokolov</a> on <a href="https://unsplash.com/?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>.

@@ -1,0 +1,39 @@
+---
+slug: 'how-to-change-ios-push-notifications-permission-dialog-with-expo'
+title: 'How to Change iOS Push Notifications Permission Dialog with Expo'
+desc: "To receive push notifications we need to ask the user permission first. The [requestPermissionsAsync](https://docs.expo.dev/versions/latest/sdk/notifications/#requestpermissionsasyncpermissions) function will show the user standard dialog asking to allow displaying alerts, setting badge count, and playing sounds. Unfortunately, the docs have no information on how to change the dialog's text and make it more personal for our app."
+createdAt: '2024-09-13'
+coverImage: '/images/2024-09-13/cover.webp'
+---
+
+To receive push notifications we need to ask the user permission first. The [requestPermissionsAsync](https://docs.expo.dev/versions/latest/sdk/notifications/#requestpermissionsasyncpermissions) function will show the user standard dialog asking to allow displaying alerts, setting badge count, and playing sounds.
+
+![Standard iOS permission dialog](/images/2024-09-13/1.webp)
+
+Unfortunately, the docs have no information on how to change the dialog's text and make it more personal for our app. I found this [Apple Developer Forums thread](https://forums.developer.apple.com/forums/thread/708259) which recommends setting the `NSUserNotificationsUsageDescription` key in the `Info.plist` file.
+
+For React Native app we can easily do that with XCode. And for the Expo app, we can set it with `app.json` or `app.config.js` [configuration](https://docs.expo.dev/versions/latest/config/app/) files.
+
+All we need to do is to go to the `ios -> infoPlist` section of the [configuration](https://docs.expo.dev/versions/latest/config/app/#infoplist) file and add `NSUserNotificationsUsageDescription` key like so:
+
+```json
+{
+  "name": "My awesome app",
+  "ios": {
+    "infoPlist": {
+      "NSUserNotificationsUsageDescription": "Allow notifications to stay up to date. These can be configured from the System Settings."
+    }
+  }
+}
+```
+
+That's it! 🎉
+Rebuild your app binary and enjoy your new permission text.
+
+---
+
+Happy hacking! 💻
+
+### Credits
+
+Photo by <a href="https://unsplash.com/@ademay?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Adem AY</a> on <a href="https://unsplash.com/photos/white-and-green-remote-control-zs-41Br0WhQ?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>.

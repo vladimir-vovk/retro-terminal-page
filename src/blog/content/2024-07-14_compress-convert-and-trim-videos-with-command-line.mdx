@@ -1,0 +1,145 @@
+---
+slug: 'compress-convert-and-trim-videos-with-command-line'
+title: 'Compress, Convert and Trim Videos with Command Line'
+desc: "Often, we have videos of different formats and resolutions from our phones and cameras, and also from our friends and family. Sometimes, these videos are uncompressed, so they take up a lot of space. There are many methods how we can solve this problem. But here, I would like to tell you about [FFmpeg](https://ffmpeg.org/)."
+createdAt: '2024-07-14'
+coverImage: '/images/2024-07-14/cover.webp'
+---
+
+## ffmpeg
+
+Often, we have videos of different formats and resolutions from our phones and cameras, and also from our friends and family. Sometimes, these videos are uncompressed, so they take up a lot of space.
+
+There are many methods how we can solve this problem. But here, I would like to tell you about [FFmpeg](https://ffmpeg.org/). It is a free and open-source tool available for all major operating systems. FFmpeg is fast and gives good results in compression, changing formats, and resolution.
+
+To compress our favorite `cats.mov` video and convert it to `mp4` format, we need to run:
+
+```bash
+ffmpeg -i cats.mov cats.mp4
+```
+
+Pretty easy, right? The only downside of this command is that `ffmpeg` does not give us a user-friendly UI. There is no progress bar or estimated time to finish.
+
+![ffmpeg](/images/2024-07-14/1.webp)
+
+## menc
+
+Introducing [menc](https://github.com/vladimir-vovk/menc) (media encoder), a small "wrapper" utility around `ffmpeg` which gives a nicer UI and can help to process several files more easily.
+
+To compress the same `cats.mov` video with `menc`, we need to run:
+
+```bash
+npx menc cats.mov
+```
+
+![menc](/images/2024-07-14/2.webp)
+
+It will use the `mp4` format by default and create a `cats.mp4` file in the same folder.
+
+> Please ensure you have [Node.js](https://nodejs.org/en/download/package-manager) installed on your machine.
+
+If you want to extract audio or change resolution it can be done with the `--format` argument. For example, the following command will compress our video and change the resolution to full HD.
+
+```bash
+npx menc -f fhd cats.mov
+```
+
+You can find all supported formats with `--help` argument:
+
+```bash
+npx menc --help
+```
+
+![menc --help](/images/2024-07-14/3.webp)
+
+To trim a media file, we can use the `--start-time` and `--end-time` arguments:
+
+```bash
+npx menc -s 10 -e 1:09:04 cats.mov
+```
+
+This command will compress the `cats.mov` file into `cats.mp4` from the 10th second to 1:09:04.
+
+If we want to trim a file without changing format (re-encoding) we can use the `--copy` argument:
+
+```bash
+npx menc -e 1:05 --copy cats.mp4
+```
+
+This command will trim the `cats.mp4` (no re-encoding) into a new file from the beginning until 1:05.
+
+To convert several files, we can use the wildcard character. For example, if we have more than one `mov` file, we can process them all with only one command:
+
+```bash
+npx menc *.mov
+```
+
+If we want to write results into a separate `my_compressed_mp4_files` folder, we can do that with the `--dir` argument:
+
+```bash
+npx menc -d my_compressed_mp4_files *.mov
+```
+
+Custom ffmpeg arguments are also supported. For example, if we need to scale a video file, making the width equal to 320 pixels, keeping the aspect ratio, we can use the `--custom` argument:
+```bash
+npx menc --custom '-vf scale=320:-2' cats.mp4
+```
+
+Or, if we want ot set bitrate for output MP3 file to 64k to make it smaller size:
+```
+npx menc -c '-b:a 64k' -f mp3 meow.mp3
+```
+
+---
+
+Please try [menc](https://github.com/vladimir-vovk/menc), give it a star 🌟, and happy hacking! 💻
+
+### Credits
+
+Photo by <a href="https://unsplash.com/@alanalves?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Alan Alves</a> on <a href="https://unsplash.com/photos/a-computer-screen-showing-a-man-sitting-in-a-chair-zEabW3zTygc?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+
+To trim a media file, we can use the `--start-time` and `--end-time` arguments:
+
+```bash
+npx menc -s 10 -e 1:09:04 cats.mov
+```
+
+This command will compress the `cats.mov` file into `cats.mp4` from the 10th second to 1:09:04.
+
+If we want to trim a file without changing format (re-encoding) we can use the `--copy` argument:
+
+```bash
+npx menc -e 1:05 --copy cats.mp4
+```
+
+This command will trim the `cats.mp4` (no re-encoding) into a new file from the beginning until 1:05.
+
+To convert several files, we can use the wildcard character. For example, if we have more than one `mov` file, we can process them all with only one command:
+
+```bash
+npx menc *.mov
+```
+
+If we want to write results into a separate `my_compressed_mp4_files` folder, we can do that with the `--dir` argument:
+
+```bash
+npx menc -d my_compressed_mp4_files *.mov
+```
+
+Custom ffmpeg arguments are also supported. For example, if we need to scale a video file, making the width equal to 320 pixels, keeping the aspect ratio, we can use the `--custom` argument:
+```bash
+npx menc --custom '-vf scale=320:-2' cats.mp4
+```
+
+Or, if we want to set a bitrate for the output MP3 file to 64k to make it a smaller size:
+```bash
+npx menc -c '-b:a 64k' -f mp3 meow.mp3
+```
+
+---
+
+Please try [menc](https://github.com/vladimir-vovk/menc), give it a star 🌟, and happy hacking! 💻
+
+### Credits
+
+Photo by <a href="https://unsplash.com/@alanalves?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Alan Alves</a> on <a href="https://unsplash.com/photos/a-computer-screen-showing-a-man-sitting-in-a-chair-zEabW3zTygc?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>.

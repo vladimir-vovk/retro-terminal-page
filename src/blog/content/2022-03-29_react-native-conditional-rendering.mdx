@@ -1,0 +1,84 @@
+---
+slug: 'react-native-conditional-rendering'
+title: 'React Native Conditional Rendering'
+desc: "In general, conditional rendering in React Native is the same as in React. But be aware, that in React Native we can render strings only inside the Text component. So, for example, if we will try to put a string inside a View we will get an error."
+createdAt: '2022-03-29'
+coverImage: '/images/2022-03-29/cover.webp'
+---
+
+In general, conditional rendering in React Native is the same as in [React](https://en.reactjs.org/docs/conditional-rendering.html). But be aware, that in React Native we can render strings only inside the `Text` component. So, for example, if we will try to put a string inside a `View` we will get an error.
+
+## Inline if with logical "&&" operator.
+
+```jsx
+<View>
+  {!!error && <ErrorMessage />}
+</View>
+```
+
+☝🏻 Double negation `!!` operator is very important here (also we can use the `Boolean` function), because it ensures that the left part of the condition will be a boolean value.
+
+Why it is important? Because logical “and” operator `&&` will return the right side of the condition if the left side is `truthy`. And will return the left side of the condition if the left side is `falsy`.
+
+Imaging we have a component:
+```jsx
+<View>
+  {error && <ErrorMessage />}
+</View>
+```
+
+If the `error` variable will be an `object`, `null` or `undefined` everything will work as expected. But if we will get an empty string for the error (`error = ''`) then our component will brake, because we can’t render strings inside a `View` component.
+
+```jsx
+// error = ''
+// {error && <something>} will return the error variable,
+// which equals to the empty string and we will get:
+<View>
+  ''
+</View>
+// which will throw an error, because we
+// can't render strings inside a View
+```
+
+
+## Inline "if-else" with ternary "?" operator.
+
+```jsx
+{error ? <ErrorMessage /> : <SuccessMessage />}
+```
+or
+```jsx
+{error ? <ErrorMessage /> : null}
+```
+
+Here we can return `null` or `<></>` (React Fragment) depend on our component structure and return type.
+
+## "if" statement
+
+```jsx
+...
+
+const Error = () => {
+  if (!error) {
+    return null
+  }
+
+  return <ErrorMessage />
+}
+
+return (
+  <View>
+    <Error />
+  </View>
+)
+```
+
+## Code example
+
+Please use [this Expo Snack](https://snack.expo.dev/@vladimir_vovk/conditional-rendering) to see the full code and play with it.
+
+Happy hacking! 🎉
+
+## Credits
+
+Photo by <a href="https://unsplash.com/@isaacstruna?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Isaac Struna</a> on <a href="https://unsplash.com/s/photos/condition?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>.

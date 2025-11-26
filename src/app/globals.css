@@ -31,6 +31,10 @@ body {
   background-color: var(--off);
 }
 
+.terminalBody {
+  background-color: var(--off);
+}
+
 input, select, button{
   font-family: inherit;
   font-size: inherit;

@@ -42,7 +42,7 @@ Enjoy your stay!
 
 =^_^=
 
-Please type "help" to get available commands.
+Please type "help" or press the menu button (at the bottom right) to get available commands.
 
 `
   setContent((oldContent: any) => {

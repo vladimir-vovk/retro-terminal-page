@@ -4,7 +4,7 @@ import path from 'path'
 import matter from 'gray-matter'
 import { PostMetaData, PostRaw } from '../types'
 
-const contentDir = '/src/content/'
+const contentDir = '/src/blog/content/'
 
 const getContentPath = (fileName: string) => {
   return `${contentDir}${fileName}`

@@ -1,3 +1,4 @@
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { Dispatch, SetStateAction } from 'react'
 export type ElementType = 'text' | 'input' | 'button' | 'link'
 
@@ -47,4 +48,5 @@ export type CreateContentBlockArgs = {
 
 export type CommandArgs = {
   setContent: Dispatch<SetStateAction<ContentBlock[]>>
+  router: AppRouterInstance
 }

@@ -17,8 +17,10 @@ import {
   makeCoffee,
   whoami,
   reboot,
-  date
+  date,
+  blog
 } from './commands'
+import { useRouter } from 'next/navigation'
 
 const font = VT323({ weight: '400', subsets: ['latin'] })
 
@@ -31,7 +33,8 @@ const commands: Record<string, (...args: any[]) => void> = {
   make_coffee: makeCoffee,
   whoami,
   reboot,
-  date
+  date,
+  blog
 }
 
 const initialContent: ContentBlock[] = [
@@ -47,12 +50,16 @@ const initialContent: ContentBlock[] = [
 ]
 
 export const Terminal = () => {
+  const router = useRouter()
   const [content, setContent] = useState<ContentBlock[]>(initialContent)
 
   /* run welcome script */
   useEffect(() => {
+    /* Fix body background color when come back from the blog */
+    document.body.classList.add('terminalBody')
+
     const timeoutId = setTimeout(() => {
-      welcome({ setContent })
+      welcome({ setContent, router })
     }, 1000)
 
     return () => clearTimeout(timeoutId)
@@ -99,7 +106,7 @@ export const Terminal = () => {
     })
 
     if (Object.keys(commands).includes(command)) {
-      commands[command]?.({ setContent })
+      commands[command]?.({ setContent, router })
     } else {
       setContent((oldContent) => {
         const newContent = [...oldContent]

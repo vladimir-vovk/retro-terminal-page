@@ -74,14 +74,13 @@ html {
 
 body {
   color: var(--color-text);
-  background: var(--color-background);
+  background-color: var(--color-background);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   font-family: var(--font-system);
   font-size: 1.5rem;
   line-height: 2.6rem;
-  padding: 0 1rem;
 
   @media(max-width: 764px) {
     font-size: 1.4rem;
@@ -96,12 +95,13 @@ main {
   width: 100%;
   max-width: 62rem;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 header, footer {
   width: 100%;
   max-width: 62rem;
-  padding: 24px 0rem;
+  padding: 24px 1rem;
   margin: 0 auto;
 }
 

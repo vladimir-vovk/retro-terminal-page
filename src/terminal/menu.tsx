@@ -72,6 +72,11 @@ export const Menu = ({ content, setContent, execute }: Props) => {
             },
             {
               type: 'button',
+              text: '[ blog ]',
+              onPress: () => onPress('blog')
+            },
+            {
+              type: 'button',
               text: '[ contact ]',
               onPress: () => onPress('contact')
             },

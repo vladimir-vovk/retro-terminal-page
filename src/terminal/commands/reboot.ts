@@ -2,7 +2,7 @@ import { createContentBlock, pause } from '../utils'
 import { CommandArgs } from '../types'
 import { welcome } from './welcome'
 
-export const reboot = async ({ setContent }: CommandArgs): Promise<void> => {
+export const reboot = async ({ setContent, router }: CommandArgs): Promise<void> => {
   let isWaiting = true
   const text = `Bye! ~(=^‥^)ノ
 `
@@ -29,5 +29,5 @@ export const reboot = async ({ setContent }: CommandArgs): Promise<void> => {
 
   await pause(2000)
 
-  await welcome({ setContent })
+  await welcome({ setContent, router })
 }

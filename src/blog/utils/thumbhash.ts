@@ -21,6 +21,15 @@ export async function generateThumbHash(filename: string) {
   return thumbHashBase64
 }
 
+export async function imageSize(filename: string) {
+  const imagesPath = path.join(process.cwd(), 'public')
+  const arrayBuffer = await readFile(path.join(imagesPath, filename))
+  const buffer = Buffer.from(arrayBuffer)
+  const { width, height } = await sharp(buffer).metadata()
+
+  return { width, height }
+}
+
 export function base64ToUint8Array(base64: string): Uint8Array {
   const decodedString = atob(base64)
   const arrayBuffer = new Uint8Array(decodedString.length)

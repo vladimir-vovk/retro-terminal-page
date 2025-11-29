@@ -1,5 +1,4 @@
 import Link from 'next/link'
-// import Image from 'next/image'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import { thumbHashToDataURL } from 'thumbhash'
 import { Code } from '@/blog/ui'
@@ -7,7 +6,7 @@ import { PostMetaData } from '../types'
 import { formatDate } from '../utils'
 import styles from './post-preview.module.css'
 import { generateThumbHash, base64ToUint8Array } from '../utils'
-import { Image } from '@/blog/ui'
+import { Image, ImageMdx } from '@/blog/ui'
 
 type Props = {} & PostMetaData
 
@@ -42,7 +41,8 @@ export const PostPreview = async ({
       <MDXRemote
         source={desc}
         components={{
-          pre: Code
+          pre: Code,
+          img: ImageMdx
         }}
       />
       <div className={styles.readMore}>

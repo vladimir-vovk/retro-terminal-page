@@ -1,9 +1,10 @@
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import { loadBlogPost, formatDate } from '../utils'
-import { Code } from '@/blog/ui'
+import { Code, Image, ImageMdx } from '@/blog/ui'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import styles from './post.module.css'
+import { thumbHashToDataURL } from 'thumbhash'
+import { generateThumbHash, base64ToUint8Array } from '../utils'
 
 type Props = {
   slug: string
@@ -16,8 +17,11 @@ export const Post = async ({ slug }: Props) => {
     notFound()
   }
 
-  const { title, createdAt, coverImage } = post.frontmatter
+  const { title, createdAt, coverImage, coverAlt } = post.frontmatter
   const { content } = post
+
+  const thumbhash = await generateThumbHash(coverImage)
+  const thumbhashSrc = thumbHashToDataURL(base64ToUint8Array(thumbhash))
 
   return (
     <article className={styles.container}>
@@ -25,9 +29,8 @@ export const Post = async ({ slug }: Props) => {
         <Image
           className={styles.coverImage}
           src={coverImage}
-          fill={true}
-          objectFit="cover"
-          alt="Post cover image"
+          thumbhash={thumbhashSrc}
+          alt={coverAlt}
         />
       </div>
       <h1>{title}</h1>
@@ -35,7 +38,8 @@ export const Post = async ({ slug }: Props) => {
       <MDXRemote
         source={content}
         components={{
-          pre: Code
+          pre: Code,
+          img: ImageMdx
         }}
       />
     </article>

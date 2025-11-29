@@ -7,7 +7,7 @@ import styles from './Image.module.css'
 type Props = {
   src: string
   thumbhash: string
-  className: string
+  className?: string
   alt?: string
 }
 
@@ -30,7 +30,7 @@ export const Image = ({ src, thumbhash, className, alt }: Props) => {
 
   return (
     <div className={styles.container}>
-      {loading && thumbhash ? (
+      {thumbhash ? (
         <img
           aria-hidden="true"
           alt=""

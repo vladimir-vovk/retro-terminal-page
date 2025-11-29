@@ -4,6 +4,7 @@ export type PostMetaData = {
   desc: string
   createdAt: string
   coverImage: string
+  coverAlt?: string
 }
 
 export type PostRaw = {

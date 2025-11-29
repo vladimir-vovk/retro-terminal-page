@@ -1,15 +1,27 @@
 import Link from 'next/link'
-import Image from 'next/image'
+// import Image from 'next/image'
 import { MDXRemote } from 'next-mdx-remote/rsc'
+import { thumbHashToDataURL } from 'thumbhash'
 import { Code } from '@/blog/ui'
 import { PostMetaData } from '../types'
 import { formatDate } from '../utils'
 import styles from './post-preview.module.css'
+import { generateThumbHash, base64ToUint8Array } from '../utils'
+import { Image } from '@/blog/ui'
 
 type Props = {} & PostMetaData
 
-export const PostPreview = ({ title, createdAt, desc, slug, coverImage }: Props) => {
+export const PostPreview = async ({
+  title,
+  createdAt,
+  desc,
+  slug,
+  coverImage,
+  coverAlt
+}: Props) => {
   const postUrl = `/blog/${slug}`
+  const thumbhash = await generateThumbHash(coverImage)
+  const thumbhashSrc = thumbHashToDataURL(base64ToUint8Array(thumbhash))
 
   return (
     <article className={styles.article}>
@@ -23,9 +35,8 @@ export const PostPreview = ({ title, createdAt, desc, slug, coverImage }: Props)
         <Image
           className={styles.coverImage}
           src={coverImage}
-          fill={true}
-          objectFit="cover"
-          alt="Post cover image"
+          thumbhash={thumbhashSrc}
+          alt={coverAlt}
         />
       </div>
       <MDXRemote

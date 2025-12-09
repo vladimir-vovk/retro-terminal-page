@@ -24,7 +24,7 @@ export const ThemeProvider = ({ children }: Props) => {
   const [theme, setTheme] = useState<ThemeType>(defaultTheme)
 
   const setThemeClass = (newTheme: ThemeType) => {
-    const currentTheme = newTheme === 'light' ? 'dark' : 'light'
+    const currentTheme = newTheme === 'dark' ? 'light' : 'dark'
     document.documentElement.classList.remove(currentTheme)
     document.documentElement.classList.add(newTheme)
   }

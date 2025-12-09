@@ -44,8 +44,10 @@ h6 {
   --color-background: off-white;
   --color-code-background: #F2F2F2;
   --color-quote-border: #BDBDBD;
+}
 
-  @media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
+  :root {
     --color-text: white;
     --color-background: rgb(31, 32, 40);
     --color-code-background: #9E9E9E;

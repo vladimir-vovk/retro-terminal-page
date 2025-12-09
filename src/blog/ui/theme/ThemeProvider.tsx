@@ -1,8 +1,8 @@
 'use client'
 import { createContext, ReactElement, useCallback, useContext, useEffect, useState } from 'react'
 
-const defaultTheme = 'light'
-type ThemeType = 'light' | 'dark'
+const defaultTheme = 'default'
+type ThemeType = 'light' | 'dark' | 'default'
 
 type ThemeContextType = {
   theme: ThemeType

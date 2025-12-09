@@ -1,5 +1,5 @@
 'use client'
-import { Sun, Moon } from 'lucide-react'
+import { Sun, Moon, SunMoon } from 'lucide-react'
 import styles from './ThemeButton.module.css'
 import { useTheme } from './ThemeProvider'
 
@@ -12,7 +12,7 @@ export const ThemeButton = () => {
 
   return (
     <button className={styles.themeButton} onClick={onClick}>
-      {theme === 'light' ? <Sun /> : <Moon />}
+      {theme === 'light' ? <Sun /> : theme === 'dark' ? <Moon /> : <SunMoon />}
     </button>
   )
 }

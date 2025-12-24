@@ -1,0 +1,81 @@
+---
+slug: 'exposing-methods-from-react-functional-components'
+title: 'Exposing Methods from React Functional Components'
+desc: "In React we are using `props` to control our components. But sometimes we need more..."
+createdAt: '2025-12-24'
+coverImage: '/images/2025-12-24/cover.webp'
+coverAlt: 'Electronic Components'
+---
+
+In React we are using `props` to control our components. But sometimes we need more...
+
+Let us imaging we are building a custom form input component. And then we need to focus it when something happens in our app. How should we do this?
+
+We can easily get a `reference` to the component with the `ref` prop.
+
+```ts
+...
+const ref = useRef()
+
+...
+<FormInput ref={ref} />
+...
+```
+
+But how we can expose a method from a functional component? 🤔
+
+We can use the `useImperativeHandle` [hook](https://react.dev/reference/react/useImperativeHandle)!
+
+```ts
+...
+
+export const FormInput = ({ label, placeholder, ref }: Props) => {
+  const inputRef = useRef<TextInput>(null)
+
+  const focus = () => {
+    inputRef.current?.focus()
+  }
+
+  useImperativeHandle(ref, () => {
+    return {
+      focus
+    }
+  }, [])
+
+  return (
+    <View>
+      <Text style={styles.label}>{label}</Text>
+      <TextInput ref={inputRef} style={styles.input} placeholder={placeholder} placeholderTextColor="gray" />
+    </View>
+  )
+}
+
+...
+```
+
+Here we have created the `focus` function and then exposed it with the `useImperativeHandle` hook. Now we can use this function in our parent component.
+
+```ts
+...
+
+const formInputRef = useRef()
+
+...
+  // use the ref to focus the component
+  formInputRef.current.focus()
+...
+
+return <FormInput ref={formInputRef} />
+
+...
+```
+
+Yay! 🎉
+
+❗But... do not overuse refs. We should only use refs for imperative behaviors that we can not express as props (scrolling to a node, focusing a node, triggering an animation, selecting text, etc). If we can express something as a prop, we should not use a ref.
+
+Please see the full example and play with the code using [this](https://snack.expo.dev/@vladimir_vovk/8fc72e) Expo Snack. 👀
+
+## Credits
+
+Photo by <a href="https://unsplash.com/@nahakiole?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Robin Glauser</a> on <a href="https://unsplash.com/photos/flat-lay-photography-of-circuit-board-zP7X_B86xOg?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>.

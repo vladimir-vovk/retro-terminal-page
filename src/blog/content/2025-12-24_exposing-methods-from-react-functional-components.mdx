@@ -7,9 +7,9 @@ coverImage: '/images/2025-12-24/cover.webp'
 coverAlt: 'Electronic Components'
 ---
 
-In React we are using `props` to control our components. But sometimes we need more...
+In React, we are using `props` to control our components. But sometimes we need more...
 
-Let us imaging we are building a custom form input component. And then we need to focus it when something happens in our app. How should we do this?
+Let us imagine we are building a custom form input component. And then we need to focus on it when something happens in our app. How should we do this?
 
 We can easily get a `reference` to the component with the `ref` prop.
 
@@ -22,7 +22,7 @@ const ref = useRef()
 ...
 ```
 
-But how we can expose a method from a functional component? 🤔
+But how can we expose a method from a functional component? 🤔
 
 We can use the `useImperativeHandle` [hook](https://react.dev/reference/react/useImperativeHandle)!
 
@@ -72,7 +72,7 @@ return <FormInput ref={formInputRef} />
 
 Yay! 🎉
 
-❗But... do not overuse refs. We should only use refs for imperative behaviors that we can not express as props (scrolling to a node, focusing a node, triggering an animation, selecting text, etc). If we can express something as a prop, we should not use a ref.
+❗However, do not overuse references. We should only use refs for imperative behaviors that we can not express as props (scrolling to a node, focusing a node, triggering an animation, selecting text, etc.). If we can express something as a prop, we should not use a ref.
 
 Please see the full example and play with the code using [this](https://snack.expo.dev/@vladimir_vovk/8fc72e) Expo Snack. 👀
 

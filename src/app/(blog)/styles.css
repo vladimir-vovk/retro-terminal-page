@@ -41,7 +41,7 @@ h6 {
 /* Global Styles */
 :root {
   --color-text: dark-gray;
-  --color-background: off-white;
+  --color-background: #FFFFFF;
   --color-code-background: #F2F2F2;
   --color-quote-border: #BDBDBD;
 }
@@ -57,7 +57,7 @@ h6 {
 
 .light {
   --color-text: dark-gray;
-  --color-background: off-white;
+  --color-background: #FFFFFF;
   --color-code-background: #F2F2F2;
   --color-quote-border: #BDBDBD;
 }

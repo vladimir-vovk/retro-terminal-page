@@ -10,10 +10,16 @@
 }
 
 .header {
+  position: relative;
+}
+
+.content {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 10;
 }
 
 .link {
@@ -26,4 +32,3 @@
   flex-direction: row;
   gap: 1.5rem;
 }
-

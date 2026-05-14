@@ -1,0 +1,202 @@
+---
+slug: 'hono-rpc-and-react-monorepo-template'
+title: 'Hono RPC and React Monorepo Template'
+desc: "[Hono RPC](https://hono.dev/docs/guides/rpc) is a built-in feature of the Hono web framework that enables end‑to‑end type safety between your backend API and frontend client by automatically sharing and synchronising API specifications—without any code generation. Let's see how we can create a monorepo with Hono API and a React app."
+createdAt: '2026-05-14'
+coverImage: '/images/2026-05-14/cover.webp'
+coverAlt: 'Card index'
+---
+
+[Hono RPC](https://hono.dev/docs/guides/rpc) is a built-in feature of the Hono web framework that enables end‑to‑end type safety between your backend API and frontend client by automatically sharing and synchronising API specifications—without any code generation.
+
+Let's see how we can create a monorepo with Hono API and a React app.
+
+## Monorepo
+
+First, we need to create a folder for our new monorepo.
+
+```shell
+mkdir hono-rpc-and-react-monorepo
+cd hono-rpc-and-react-monorepo
+```
+
+Check that we have the latest pnpm installed.
+
+```shell
+npm i -g pnpm@latest
+```
+
+Init new project.
+
+```shell
+pnpm init
+```
+
+Add the `pnpm-workspace.yaml` workspace configuration file.
+
+```yaml
+packages:
+  - 'api'
+  - 'web'
+```
+
+## Hono
+
+Now we can create an empty Hono project.
+
+```shell
+pnpm create hono@latest api
+```
+
+We need to update the `api/package.json`.
+
+```json
+{
+  "name": "@repo/api",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --build",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.14",
+    "hono": "^4.12.18"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
+  }
+}
+```
+
+The `name` and `build` props were changed, and the `main` prop was added.
+
+Let's export the hono application type from `api/src/index.ts`. We will need it to create a hono client inside our React app.
+
+```typescript
+import { serve } from '@hono/node-server'
+import { Hono } from 'hono'
+
+const app = new Hono().get('/api', (c) => {
+  return c.text('Hello Hono!')
+})
+
+export type AppType = typeof app
+
+serve(
+  {
+    fetch: app.fetch,
+    port: 3000
+  },
+  (info) => {
+    console.log(`Server is running on http://localhost:${info.port}`)
+  }
+)
+```
+
+Notice we are adding route handlers to the `new Hono()` object itself, so TypeScript could figure out the correct types for the hono client. Also, we changed the route from `/` to `/api`.
+
+## React
+
+Let's create a Vite React project.
+
+```shell
+pnpm create vite
+```
+
+Now we need to install `hono`.
+
+```shell
+pnpm i hono
+```
+
+And add `@repo/api` as a development dependency to the `web/package.json`.
+
+```json
+...
+  "devDependencies": {
+    "@repo/api": "workspace:*",
+    ...
+```
+
+Install added dependency.
+
+```shell
+pnpm i
+```
+
+Let's update the `web/vite.config.ts`, so it would proxy all requests to our api in the development mode (add the `server` prop).
+
+```javascript
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
+  }
+})
+```
+
+Now we can add a hono client to the `web/src/App.tsx`.
+
+```typescript
+...
+import { hc } from 'hono/client'
+import type { AppType } from '@repo/api'
+
+const client = hc<AppType>('/')
+
+function App() {
+  const [count, setCount] = useState('')
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await client.index.$get()
+      if (res.ok) {
+        const data = await res.text()
+        setCount(data)
+      }
+    }
+
+    fetchData()
+  }, [])
+  ...
+```
+
+## Test Time
+
+Let's add one command to the root `package.json` to run both the `api` and `web` in development.
+
+```json
+...
+  "scripts": {
+    "dev": "pnpm run --parallel dev"
+  ...
+```
+
+Now we can start our backend and frontend apps with one command.
+
+```shell
+pnpm dev
+```
+
+Open your favorite web browser and navigate to `http://localhost:5173`. You will see the default Vite React page with `Count is Hello Hono!` text. The `Hello Hono!` was successfully fetched from our api. 🎉
+
+![Vite React](/images/2026-05-14/vite-react.webp)
+
+Please check the [repo](https://github.com/vladimir-vovk/hono-rpc-and-react-monorepo) and happy hacking! 💻
+
+## Credits
+
+Photo by <a href="https://unsplash.com/@janisringli?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Janis Ringli</a> on <a href="https://unsplash.com/photos/a-bunch-of-mail-boxes-with-a-yellow-door-grHfOZFM0es?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>.

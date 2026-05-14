@@ -8,6 +8,13 @@ export const ThemeButton = () => {
 
   const onClick = () => {
     toggleTheme()
+    if (theme === 'light') {
+      const audio = new Audio('/sounds/key-1.wav')
+      audio.play()
+    } else {
+      const audio = new Audio('/sounds/key-5.wav')
+      audio.play()
+    }
   }
 
   return (

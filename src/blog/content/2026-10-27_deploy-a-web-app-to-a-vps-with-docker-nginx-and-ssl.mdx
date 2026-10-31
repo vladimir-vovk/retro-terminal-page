@@ -1,0 +1,337 @@
+---
+slug: 'deploy-a-web-app-to-a-vps-with-docker-nginx-and-ssl'
+title: 'Deploy a Web App to a VPS with Docker, Nginx, and SSL'
+desc: "Let's deploy a web app to a Debian/Ubuntu VPS."
+createdAt: '2026-10-27'
+coverImage: '/images/2026-10-27/cover.webp'
+coverAlt: 'Servers rack'
+---
+
+## Update VPS
+
+We will need a Debian/Ubuntu VPS. First, let's connect to our server.
+
+```shell
+ssh root@server-ip-address
+# E.g., ssh root@1.2.3.4
+```
+
+And update the system.
+
+```bash
+apt update && apt -y upgrade
+```
+
+## SSH-key login
+
+Now let's create a separate `deploy` user to run our app (using the `root` superuser is not the best idea).
+
+```bash
+adduser deploy
+usermod -aG sudo deploy
+```
+
+A more secure way to log in to a server is using an SSH key. Let's create one on the "local" machine.
+
+```bash
+cd ~/.ssh
+ssh-keygen -t ed25519 -f vps-key
+```
+
+And copy it to the server (use `brew install ssh-copy-id` to install `ssh-copy-id` on Mac).
+
+```bash
+ssh-copy-id -i vps-key deploy@server-ip-address
+```
+
+Check that we can log in with the SSH key.
+
+```bash
+ssh -i ~/.ssh/vps-key deploy@server-ip-address
+```
+
+Next, let's disable `root` and password login. Open the config file:
+
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+
+And set:
+
+```ssh
+PermitRootLogin no
+PasswordAuthentication no
+```
+
+Save the config file and restart the service.
+
+```bash
+sudo systemctl restart ssh
+```
+
+## Turn on Firewall (UFW)
+
+Only allow SSH, HTTP, and HTTPS.
+
+```bash
+sudo apt -y install ufw
+
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+sudo ufw enable
+sudo ufw status
+```
+
+## Install Docker
+
+Use official Docker [docs](https://docs.docker.com/engine/install/ubuntu/).
+
+Add the `deploy` user to the `docker` group.
+
+```bash
+sudo usermod -aG docker $USER
+newgrp docker
+docker version
+```
+
+## Create App Docker Image
+
+Before we can run our app with Docker on the server, we need to "pack" it into a Docker image. Go to your project folder on your local machine, and create a `Dockerfile`. Search for a Dockerfile for your language/framework. For example, a Node.js app Dockerfile could look something like [this](https://docs.docker.com/guides/nodejs/).
+
+```docker
+# syntax=docker/dockerfile:1
+
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Dockerfile reference guide at
+# https://docs.docker.com/go/dockerfile-reference/
+
+# This Dockerfile uses Docker Hardened Images (DHI) for enhanced security.
+# For more information, see https://docs.docker.com/dhi/
+
+# Builder stage: install all dependencies and compile TypeScript.
+FROM dhi.io/node:24-alpine3.23-dev AS builder
+
+WORKDIR /app
+
+# Install dependencies as a separate step to take advantage of Docker's
+# caching. Leverage a cache mount to /root/.npm to speed up subsequent
+# builds. Leverage a bind mount to package.json to avoid having to copy
+# it into this layer.
+RUN --mount=type=cache,target=/root/.npm \
+    --mount=type=bind,source=package.json,target=package.json \
+    npm install
+# Once you create a package-lock.json by running npm install locally, switch to npm ci and bind both files:
+# RUN --mount=type=cache,target=/root/.npm \
+#     --mount=type=bind,source=package.json,target=package.json \
+#     --mount=type=bind,source=package-lock.json,target=package-lock.json \
+#     npm ci
+
+# Copy the source code into the container and compile TypeScript.
+COPY . .
+RUN npm run build
+
+
+# Deps stage: install production dependencies only.
+FROM dhi.io/node:24-alpine3.23-dev AS deps
+
+WORKDIR /app
+
+RUN --mount=type=cache,target=/root/.npm \
+    --mount=type=bind,source=package.json,target=package.json \
+    npm install --omit=dev
+# Once you create a package-lock.json by running npm install locally, switch to npm ci and bind both files:
+# RUN --mount=type=cache,target=/root/.npm \
+#     --mount=type=bind,source=package.json,target=package.json \
+#     --mount=type=bind,source=package-lock.json,target=package-lock.json \
+#     npm ci --omit=dev
+
+
+# Runner stage: minimal runtime image with compiled app and production deps.
+FROM dhi.io/node:24-alpine3.23 AS runner
+
+ENV PATH=/app/node_modules/.bin:$PATH
+
+WORKDIR /app
+
+COPY --from=deps --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/dist ./dist
+
+# Expose the port that the application listens on.
+EXPOSE 3000
+
+# Run the application.
+CMD ["node", "dist/index.js"]
+```
+
+Now check that Docker is installed on your local machine, and build the app Docker image.
+
+```shell
+docker buildx build --platform linux/amd64 -t my-app:latest
+```
+
+Notice the `--platform linux/amd64` flag since we are building for our Linux server.
+
+## GitHub Container Registry
+
+Great, we just created our app Docker image on our local machine. But how will we "copy" it to the server?
+
+With Docker, we can `push` and `pull` images to the "image registry". Let's use GitHub Container Registry (ghcr.io).
+
+### Create a GitHub token to be able to push Docker images to ghcr.io
+
+- Log in to [github.com](https://github.com).
+- Click on the "Profile Icon" (the top right corner) -> select `Settings`.
+- Then `Credentials` (on the left side) -> `Personal access tokens (classic)` (on the right side)
+- Create a new token with:
+  - `write:packages` - push images
+  - `read:packages` - pull images
+  - `delete:packages` - optional
+
+### Login to ghcr.io
+
+```shell
+echo "your-github-token" | docker login ghcr.io -u your-github-username --password-stdin
+```
+
+⚠️ Change `your-github-token` and `your-github-username` to real values.
+
+### Rebuild the Image
+
+We need to rebuild the app image using the proper image name.
+
+```shell
+docker buildx build --platform linux/amd64 -t ghcr.io/your-github-username/your-app-name:latest .
+```
+
+⚠️ Change `your-github-username` and `your-app-name` to real values.
+
+### Push the Image
+
+```shell
+docker push --all-tags ghcr.io/your-github-user-name/your-app-name
+```
+
+### Pull the Image on the VPS
+
+Log in to the server.
+
+```shell
+ssh -i ~/.ssh/vps-key deploy@server-ip-address`
+```
+
+Log in to `ghcr.io`.
+
+```shell
+echo "your-github-token" | docker login ghcr.io -u your-github-username --password-stdin
+docker pull ghcr.io/geshela/gesheru_bot:latest
+```
+
+⚠️ Change `your-github-username` and `your-app-name` to real values.
+
+## Run the App
+
+```shell
+docker run -d --name your-app-name --restart unless-stopped -p 127.0.0.1:3000:3000 ghcr.io/your-github-username/your-app-name
+```
+
+⚠️ Change `your-github-username` and `your-app-name` to real values.
+
+Check if the app container is running.
+
+```shell
+docker ps
+docker logs -f --tail your-app-name
+```
+
+P.S. To restart the app.
+
+```shell
+docker stop your-app-name
+docker rm your-app-name
+
+docker run -d --name your-app-name --restart unless-stopped -p 127.0.0.1:3000:3000 ghcr.io/your-github-username/your-app-name
+```
+
+## Use Nginx as a Reverse Proxy
+
+Install Nginx.
+
+```shell
+sudo apt -y install nginx
+sudo systemctl enable --now nginx
+```
+
+Turn off the default config.
+
+```shell
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Create a new config for the app.
+
+```shell
+sudo nano /etc/nginx/sites-available/your-app-name
+```
+
+⚠️ Change `your-app-domain.com` to the real value.
+
+```nginx
+server {
+    listen 80;
+    server_name your-app-domain.com www.your-app-domain.com;
+
+    client_max_body_size 25m;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout 60s;
+    }
+}
+```
+
+Let's enable the config.
+
+```shell
+sudo ln -s /etc/nginx/sites-available/your-app-name /etc/nginx/sites-enabled/your-app-name
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+## Set up the DNS A Record
+
+This is necessary so that the domain knows which IP address it should be linked to.
+
+Log in to your domain registrar's admin panel. Add the A record. Enter the IP address of your server.
+
+## Add HTTPS with Let's Encrypt
+
+Install Certbot.
+
+```shell
+sudo apt -y install certbot python3-certbot-nginx
+```
+
+Create the certificate.
+
+```shell
+sudo certbot --nginx -d your-app-domain.com -d www.your-app-domain.com
+```
+
+That's it. The app is live now! 🥳
+
+## Credits
+
+Photo by <a href="https://unsplash.com/@kevinache?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Kevin Ache</a> on <a href="https://unsplash.com/photos/a-rack-of-servers-in-a-server-room-2JJ3wBHu4_0?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>.

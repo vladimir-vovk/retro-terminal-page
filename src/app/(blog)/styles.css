@@ -41,32 +41,32 @@ h6 {
 /* Global Styles */
 :root {
   --color-text: dark-gray;
-  --color-background: #FFFFFF;
-  --color-code-background: #F2F2F2;
-  --color-quote-border: #BDBDBD;
+  --color-background: #ffffff;
+  --color-code-background: #f2f2f2;
+  --color-quote-border: #bdbdbd;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --color-text: white;
     --color-background: rgb(31, 32, 40);
-    --color-code-background: #9E9E9E;
-    --color-quote-border: #BDBDBD;
+    --color-code-background: #9e9e9e;
+    --color-quote-border: #bdbdbd;
   }
 }
 
 .light {
   --color-text: dark-gray;
-  --color-background: #FFFFFF;
-  --color-code-background: #F2F2F2;
-  --color-quote-border: #BDBDBD;
+  --color-background: #ffffff;
+  --color-code-background: #f2f2f2;
+  --color-quote-border: #bdbdbd;
 }
 
 .dark {
   --color-text: white;
   --color-background: rgb(31, 32, 40);
   --color-code-background: #474747;
-  --color-quote-border: #BDBDBD;
+  --color-quote-border: #bdbdbd;
 }
 
 html {
@@ -84,7 +84,7 @@ body {
   font-size: 1.5rem;
   line-height: 2.6rem;
 
-  @media(max-width: 764px) {
+  @media (max-width: 764px) {
     font-size: 1.4rem;
     line-height: 2.2rem;
   }
@@ -100,7 +100,8 @@ main {
   padding: 0 1rem;
 }
 
-header, footer {
+header,
+footer {
   width: 100%;
   max-width: 62rem;
   padding: 24px 1rem;
@@ -112,7 +113,7 @@ h1 {
   line-height: 4rem;
   margin-bottom: 1rem;
 
-  @media(max-width: 764px) {
+  @media (max-width: 764px) {
     font-size: 1.8rem;
     line-height: 2.6rem;
     margin-bottom: 0.5rem;
@@ -122,9 +123,10 @@ h1 {
 h2 {
   font-size: 2.6rem;
   line-height: 3.25rem;
+  margin-top: 2rem;
   margin-bottom: 1rem;
 
-  @media(max-width: 764px) {
+  @media (max-width: 764px) {
     font-size: 1.6rem;
     line-height: 2.4rem;
     margin-bottom: 0.5rem;
@@ -135,9 +137,9 @@ h3 {
   font-size: 2.1rem;
   line-height: 2.6rem;
   margin-top: 2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 
-  @media(max-width: 764px) {
+  @media (max-width: 764px) {
     font-size: 1.4rem;
     line-height: 2.2rem;
     margin-bottom: 0.5rem;
@@ -148,9 +150,9 @@ h4 {
   font-size: 1.7rem;
   line-height: 2.1rem;
   margin-top: 2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 
-  @media(max-width: 764px) {
+  @media (max-width: 764px) {
     font-size: 1.4rem;
     line-height: 2rem;
     margin-bottom: 0.5rem;
@@ -163,7 +165,7 @@ time {
   display: flex;
   margin-bottom: 2rem;
 
-  @media(max-width: 764px) {
+  @media (max-width: 764px) {
     font-size: 1.4rem;
   }
 }
@@ -175,7 +177,7 @@ a {
 p {
   margin-bottom: 1.5rem;
 
-  @media(max-width: 764px) {
+  @media (max-width: 764px) {
     margin-bottom: 1.2rem;
   }
 }
@@ -192,7 +194,7 @@ blockquote {
   padding-left: 1rem;
   margin-bottom: 2rem;
 
-  @media(max-width: 764px) {
+  @media (max-width: 764px) {
     margin-bottom: 1.2rem;
   }
 }
@@ -216,7 +218,7 @@ ol {
 code {
   font-size: 1.35rem;
 
-  @media(max-width: 764px) {
+  @media (max-width: 764px) {
     font-size: 1.15rem;
     -webkit-text-size-adjust: 100%;
     -moz-text-size-adjust: 100%;
@@ -244,12 +246,14 @@ hr {
 }
 
 .dark {
-  time, p, li {
+  time,
+  p,
+  li {
     color: rgb(169, 173, 193);
   }
 
   a {
-    color: #F97C00;
+    color: #f97c00;
   }
 
   a > pre {
